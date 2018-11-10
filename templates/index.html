@@ -1,0 +1,19 @@
+{% load render_bundle from webpack_loader %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Django - Auth0 - Vue</title>
+
+</head>
+<body>
+<div id="app">
+    {% if not DEBUG %}
+          {% render_bundle 'manifest' 'js' %}
+          {% render_bundle 'vendor' 'js' %}
+    {% endif %}
+    {% render_bundle 'app' %}
+</div>
+
+</body>
+</html>
