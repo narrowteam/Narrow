@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <v-btn color="success">Success</v-btn>
     <img src="./assets/logo.png">
     <router-view/>
   </div>
