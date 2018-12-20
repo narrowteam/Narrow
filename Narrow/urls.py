@@ -26,5 +26,5 @@ urlpatterns = [
     url(r'^api-token-auth/', obtain_jwt_token),
     path('user/', include(('UserManagement.router', 'UserManagement'), namespace='user'), ),
     path('permissions/', include(('permissions.router', 'permissions'),  namespace='permissions'),),
-    url(r'^$', TemplateView.as_view(template_name='index.html'), name='index'),
+    path('tasks/', include(('tasks.router', 'tasks'),  namespace='tasks'),),
 ]

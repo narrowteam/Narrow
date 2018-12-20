@@ -38,6 +38,7 @@ ALLOWED_HOSTS = ['*']
 NARROW_APPS = [
     'UserManagement.apps.UsermanagementConfig',
     'permissions.apps.PermissionsConfig',
+    'tasks.apps.TasksConfig',
 ]
 
 INSTALLED_APPS = NARROW_APPS + [
@@ -47,7 +48,6 @@ INSTALLED_APPS = NARROW_APPS + [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'webpack_loader',
     'rest_framework_jwt',
 
     'rest_framework.authtoken',
@@ -135,19 +135,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
-WEBPACK_LOADER = {
-    'DEFAULT': {
-        'BUNDLE_DIR_NAME': '',
-        'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats.json'),
-    }
-}
-
-STATICFILES_DIRS = (
-    #This lets Django's collectstatic store our bundles
-    os.path.join(BASE_DIR, 'dist'),
-)
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (

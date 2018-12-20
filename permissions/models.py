@@ -1,5 +1,7 @@
 from django.db import models
 from django.db.models import Q
+from tasks.models import Task
+
 
 class ProjectManager(models.Manager):
     use_in_migrations = True
@@ -9,10 +11,24 @@ class ProjectManager(models.Manager):
         project.save(using=self._db)
         # Auto adds owner as participant of project
         project.participants.add(project.owner)
+        self.add_main_task_for_project(project, **validated_data)
+
         return project
+
+    def add_main_task_for_project(self, project, **validated_data):
+        task_data = {
+            'name': validated_data['project_name'],
+            'project': project
+        }
+        if 'description' in validated_data:
+            task_data['description'] = validated_data['description']
+        Task.objects.create_main_task(**task_data)
+
 
 
 class Project(models.Model):
+    objects = ProjectManager()
+
     owner = models.ForeignKey(
         'UserManagement.User',
         on_delete=models.CASCADE,
@@ -25,7 +41,10 @@ class Project(models.Model):
         blank=True,
         related_name='projectList'
     )
-    objects = ProjectManager()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
 
     def add_participant(self, user):
         self.participants.add(user)
@@ -52,11 +71,19 @@ class Group(models.Model):
         blank=True,
     )
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
 class Permission(models.Model):
     owner = models.ForeignKey(
         'UserManagement.User',
         on_delete=models.CASCADE,
     )
+    # target = models.ForeignKey(
+    #
+    # )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     # type #will clarify in future
     # target = owner = models.ForeignKey(
     #   'tasks.Task',
@@ -68,6 +95,8 @@ class GroupPermission(models.Model):
         'Group',
         on_delete=models.CASCADE,
     )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 class ProjectInvitation(models.Model):
     owner = models.ForeignKey(

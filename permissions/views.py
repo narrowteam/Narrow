@@ -26,7 +26,7 @@ class ProjectViewSet(ViewSet):
         serializer = ProjectDetailSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(owner=request.user)
-            return Response(status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
@@ -59,7 +59,7 @@ class ProjectViewSet(ViewSet):
         else:
             return Response(serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
-    @action(detail=True, methods=['post'], url_path='invite', permission_classes = [IsOwner])
+    @action(detail=True, methods=['post'], url_path='invite', permission_classes=[IsOwner])
     def invite_user(self, request, pk=None):
         serializer = UsersToInviteListSerializer(data=request.data)
 

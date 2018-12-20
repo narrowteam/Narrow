@@ -12,13 +12,29 @@ class ProjectSerializer(serializers.ModelSerializer):
     owner = UserSerializer(required=False)
     class Meta:
         model = Project
-        fields = ('id','owner', 'project_name', 'description', 'participants__count')
+        fields = (
+            'id',
+            'owner',
+            'project_name',
+            'description',
+            'participants__count'
+        )
         extra_kwargs = {
-            'id': {'read_only': True},
-            'owner': {'read_only': True},
-            'project_name': {'required': True},
-            'description': {'required': False},
-            'participants__count': {'read_only': True,},
+            'id': {
+                'read_only': True
+            },
+            'owner': {
+                'read_only': True
+            },
+            'project_name': {
+                'required': True
+            },
+            'description': {
+                'required': False
+            },
+            'participants__count': {
+                'read_only': True,
+            },
         }
 
 class ProjectDetailSerializer(ProjectSerializer):
@@ -27,14 +43,34 @@ class ProjectDetailSerializer(ProjectSerializer):
 
     class Meta:
         model = Project
-        fields = ('id','owner', 'project_name', 'description', 'participants')
+        fields = (
+            'id',
+            'owner',
+            'project_name',
+            'description',
+            'participants'
+        )
         extra_kwargs = {
-            'id': {'read_only': True, 'required': False},
-            'owner': {'read_only': True, 'required': False},
-            'project_name': {'required': True},
-            'description': {'required': False},
-            'participants': {'required': False, 'read_only': True},
+            'id': {
+                'read_only': True,
+                'required': False
+            },
+            'owner': {
+                'read_only': True,
+                'required': False
+            },
+            'project_name': {
+                'required': True
+            },
+            'description': {
+                'required': False
+            },
+            'participants': {
+                'required': False,
+                'read_only': True
+            },
         }
+
 class ProjectPatchSerializer(ProjectSerializer):
     class Meta:
         model = Project
@@ -47,23 +83,27 @@ class ProjectPatchSerializer(ProjectSerializer):
         instance.update(**validated_data)
         return instance
 
+
 # Nested serializer used to validate lists of emails or ids
 class IdOrEmailListSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=False)
     email = serializers.EmailField(required=False)
 
-# '''
-#     Used for serialize list of objects including id ot email (one of) and create invitations
-# '''
+
+'''
+    Used for serialize list of objects including id ot email (one of) and create invitations
+'''
 class UsersToInviteListSerializer(serializers.Serializer):
     invitations_list = IdOrEmailListSerializer(many=True, required=True)
     project = serializers.IntegerField(read_only=True)
 
     def create(self, validated_data):
-        '''
-            Validated data is set of dictionaries with optional user id or email (one of or both)
 
         '''
+            Validated data is set of dictionaries with optional
+            user id or email (one of or both)
+        '''
+
         list = EmailOrIdUserList(validated_data['invitations_list'])
         users = list.get_user_models()
 
