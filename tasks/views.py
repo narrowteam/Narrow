@@ -60,11 +60,9 @@ class TaskViewSet(mixins.RetrieveModelMixin,
         else:
             return Response(serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
-    @action(detail=True, methods=['get'], url_path='project', permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['post'], url_path='push_sub_task', permission_classes=[IsAuthenticated])
     def get_project_tasks(self, request, pk=None):
-        tasks = Task.objects.filter(project=pk)
-        serializer = TaskSerializer(tasks, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
     def get_permissions(self):
 
@@ -73,12 +71,12 @@ class TaskViewSet(mixins.RetrieveModelMixin,
         """
         # if self.action == 'retrieve':
         #     permission_classes = [IsOwnerOrParticipant]
-        if self.action == 'create' or self.action == 'destroy' or self.action == 'retrieve' :
-            permission_classes = [IsAuthenticated]
-        # elif self.action == 'retrieve':
-        #     permission_classes = [IsOwnerOrParticipant]
+        # if self.action == 'create' or self.action == 'destroy' or self.action == 'retrieve' :
+        #     permission_classes = [IsAuthenticated]
+        # elif self.action == 'get_project_tasks':
+        #     permission_classes = [IsAuthenticated]
         # else:
-        #     permission_classes = [IsOwner]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def get_queryset(self):

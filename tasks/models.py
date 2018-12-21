@@ -21,7 +21,7 @@ class Task(models.Model):
 
     project = models.OneToOneField(
         'permissions.Project',
-        related_name='projectTasks',
+        related_name='main_task',
         on_delete=models.CASCADE
     )
     is_main = models.BooleanField(default=False)
@@ -36,4 +36,7 @@ class Task(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def push_sub_task(self, **validated_data):
+        self.
 

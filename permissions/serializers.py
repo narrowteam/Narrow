@@ -5,6 +5,7 @@ from UserManagement.serializers import UserSerializer
 from UserManagement.models import User
 from django.db.models import Q, Subquery
 from utils.parsers import EmailOrIdUserList
+from tasks.serializers import TaskSerializer
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -17,7 +18,8 @@ class ProjectSerializer(serializers.ModelSerializer):
             'owner',
             'project_name',
             'description',
-            'participants__count'
+            'participants__count',
+
         )
         extra_kwargs = {
             'id': {
@@ -40,6 +42,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 class ProjectDetailSerializer(ProjectSerializer):
     participants = UserSerializer(required=False, many=True)
     owner = UserSerializer(required=False)
+    main_task = TaskSerializer(read_only=True)
 
     class Meta:
         model = Project
@@ -48,7 +51,8 @@ class ProjectDetailSerializer(ProjectSerializer):
             'owner',
             'project_name',
             'description',
-            'participants'
+            'participants',
+            'main_task',
         )
         extra_kwargs = {
             'id': {
@@ -74,11 +78,19 @@ class ProjectDetailSerializer(ProjectSerializer):
 class ProjectPatchSerializer(ProjectSerializer):
     class Meta:
         model = Project
-        fields = ('project_name', 'description')
+        fields = (
+            'project_name',
+            'description'
+        )
         extra_kwargs = {
-            'project_name': {'required': False},
-            'description': {'required': False},
+            'project_name': {
+                'required': False
+            },
+            'description': {
+                'required': False
+            },
         }
+
     def update(self, instance, validated_data):
         instance.update(**validated_data)
         return instance
@@ -142,12 +154,27 @@ class InvitationListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProjectInvitation()
-        fields = ('id', 'owner', 'project', 'is_accepted',)
+        fields = (
+            'id',
+            'owner',
+            'project',
+            'is_accepted',
+        )
         extra_kwargs = {
-            'id': {'read_only': True},
-            'project': {'read_only': True, 'required': False},
-            'is_accepted': {'read_only': True},
-            'owner': {'read_only': True, 'required': False},
+            'id': {
+                'read_only': True
+            },
+            'project': {
+                'read_only': True,
+                'required': False
+            },
+            'is_accepted': {
+                'read_only': True
+            },
+            'owner': {
+                'read_only': True,
+                'required': False
+            },
         }
 # class InvitationListSerializer(serializers.Serializer):
 #     invited_users= InvitationSerializer(many=True)

@@ -41,6 +41,7 @@ class ProjectViewSet(ViewSet):
         project = get_object_or_404(self.queryset, pk=pk)
         self.check_object_permissions(request, project)
         serializer = ProjectDetailSerializer(project)
+
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     # Returns only projects which user is participant of
