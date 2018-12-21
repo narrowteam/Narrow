@@ -1,5 +1,4 @@
 from django.db import models
-import time
 
 
 
@@ -8,18 +7,22 @@ class TaskManager(models.Manager):
 
     def create_main_task(self, **validated_data):
         task = self.model(**validated_data)
+        task.is_main = True
         task.save(using=self._db)
         return task
 
-    def create(self, **validated_data):
+    def create(self, parent, **validated_data):
         task = self.model(**validated_data)
-        project = Task.objects.get(parent_task=validated_data['parent_task'])
+        task.parent_task = parent
+        task.project = Task.objects.get(pk=parent.pk).project
         task.save(using=self._db)
+        return task
+
 
 class Task(models.Model):
     objects = TaskManager()
 
-    project = models.OneToOneField(
+    project = models.ForeignKey(
         'permissions.Project',
         related_name='main_task',
         on_delete=models.CASCADE
@@ -38,5 +41,7 @@ class Task(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def push_sub_task(self, **validated_data):
-        self.
+        new_task = Task.objects.create(self, **validated_data)
+        return new_task
+
 

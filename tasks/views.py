@@ -1,26 +1,14 @@
-from django.shortcuts import render
-
-# Create your views here.
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework.viewsets import ViewSet, GenericViewSet
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from UserManagement.models import User
 from rest_framework.decorators import action
-from permissions.serializers import ProjectSerializer, ProjectDetailSerializer,  ProjectPatchSerializer, \
-                                    UsersToInviteListSerializer, InvitationListSerializer, \
-                                    UsersToRemoveListSerializer
-
-from permissions.models import Project, Group, Permission, GroupPermission, ProjectInvitation
-from django.db.models import Q, Subquery, Count
-
 
 from tasks.serializers import TaskSerializer
 from tasks.models import Task
 
 from rest_framework import viewsets, mixins
+
 
 class TaskViewSet(mixins.RetrieveModelMixin,
                     mixins.UpdateModelMixin,
@@ -61,8 +49,14 @@ class TaskViewSet(mixins.RetrieveModelMixin,
             return Response(serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
     @action(detail=True, methods=['post'], url_path='push_sub_task', permission_classes=[IsAuthenticated])
-    def get_project_tasks(self, request, pk=None):
-
+    def push_sub_task(self, request, pk=None):
+        serializer = TaskSerializer(data=request.data)
+        if serializer.is_valid():
+            parent_task = get_object_or_404(self.queryset, pk=pk)
+            parent_task.push_sub_task(**serializer.validated_data)
+            return Response(serializer.validated_data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
     def get_permissions(self):
 
