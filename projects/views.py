@@ -9,14 +9,13 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from UserManagement.models import User
 from rest_framework.decorators import action
-from permissions.serializers import ProjectSerializer, ProjectDetailSerializer,  ProjectPatchSerializer, \
+from projects.serializers import ProjectSerializer, ProjectDetailSerializer,  ProjectPatchSerializer, \
                                     UsersToInviteListSerializer, InvitationListSerializer, \
                                     UsersToRemoveListSerializer
 
 from .permissions import IsOwnerOrParticipant, IsOwner, IsOwnerOrInviting
-from permissions.models import Project, Group, Permission, GroupPermission, ProjectInvitation
+from projects.models import Project, Group, ProjectInvitation
 from django.db.models import Q, Subquery, Count
-
 
 
 class ProjectViewSet(ViewSet):

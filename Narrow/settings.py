@@ -37,7 +37,7 @@ ALLOWED_HOSTS = ['*']
 
 NARROW_APPS = [
     'UserManagement.apps.UsermanagementConfig',
-    'permissions.apps.PermissionsConfig',
+    'projects.apps.ProjectsConfig',
     'tasks.apps.TasksConfig',
 ]
 

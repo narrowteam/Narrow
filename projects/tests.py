@@ -5,7 +5,7 @@ from rest_framework.test import APITestCase
 from django.urls import reverse
 from rest_framework import status
 from UserManagement import views
-from permissions.models import Project, ProjectInvitation
+from projects.models import Project, ProjectInvitation
 from UserManagement.models import User
 from django.db.models import Q
 
@@ -113,12 +113,12 @@ class ProjectViewSetTest(APITestCase):
         self.project_to_delete = Project.objects.create(**self.dataset)
         self.project_to_update = Project.objects.create(**self.dataset)
 
-        self.url_detail_project = reverse('permissions:project-detail', args=[self.project.id])
-        self.url_list_project = reverse('permissions:project-list')
+        self.url_detail_project = reverse('projects:project-detail', args=[self.project.id])
+        self.url_list_project = reverse('projects:project-list')
 
 
     def test_project_creation(self):
-        url = reverse('permissions:project-list')
+        url = reverse('projects:project-list')
         self.client.force_authenticate(user=self.user_owner)
         dataset = {
             'project_name': 'test',
@@ -127,14 +127,14 @@ class ProjectViewSetTest(APITestCase):
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
     def test_fail_project_creation(self):
-        url = reverse('permissions:project-list')
+        url = reverse('projects:project-list')
         self.client.force_authenticate(user=self.user_owner)
         resp = self.client.post(url, self.dataset_wrong)
         self.assertEqual(resp.status_code, status.HTTP_406_NOT_ACCEPTABLE)
 
     def test_project_delete(self):
         proj_id = self.project_to_delete.id
-        url = reverse('permissions:project-detail', args=[str(proj_id)])
+        url = reverse('projects:project-detail', args=[str(proj_id)])
         self.client.force_authenticate(user=self.user_owner)
         resp = self.client.delete(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
@@ -142,7 +142,7 @@ class ProjectViewSetTest(APITestCase):
 
     def test_project_delete_fail_auth_unauthorized(self):
         proj_id = self.project_to_delete.id
-        url = reverse('permissions:project-detail', args=[str(proj_id)])
+        url = reverse('projects:project-detail', args=[str(proj_id)])
         self.client.force_authenticate(user=self.user_not_owner)
         resp = self.client.delete(url)
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
@@ -160,7 +160,7 @@ class ProjectViewSetTest(APITestCase):
         self.assertTrue('description' in resp.data,)
 
     def test_project_get_404(self):
-        url = reverse('permissions:project-detail', args=[10000000])
+        url = reverse('projects:project-detail', args=[10000000])
         self.client.force_authenticate(user=self.user_owner)
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
@@ -187,7 +187,7 @@ class ProjectViewSetTest(APITestCase):
         return True
 
     def test_partial_update(self):
-        url = reverse('permissions:project-detail', args=[self.project_to_update.id])
+        url = reverse('projects:project-detail', args=[self.project_to_update.id])
         self.client.force_authenticate(user=self.user_owner)
         data ={
             'project_name': 'test_update',
@@ -200,19 +200,19 @@ class ProjectViewSetTest(APITestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
     def test_partial_update_404(self):
-        url = reverse('permissions:project-detail', args=[10000000])
+        url = reverse('projects:project-detail', args=[10000000])
         self.client.force_authenticate(user=self.user_owner)
         resp = self.client.patch(url)
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_project_patch_fail_auth_unauthorized(self):
-        url = reverse('permissions:project-detail', args=[self.project_to_update.id])
+        url = reverse('projects:project-detail', args=[self.project_to_update.id])
         self.client.force_authenticate(user=self.user_not_owner)
         resp = self.client.patch(url)
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_invite_users(self):
-        url = reverse('permissions:project-detail', args=[self.project_to_update.id]) +'invite/'
+        url = reverse('projects:project-detail', args=[self.project_to_update.id]) +'invite/'
         data ={'invitations_list':[
                 {'id': self.user_to_operations.id},
                 {'email': self.user_to_operations2.email}
@@ -225,17 +225,17 @@ class ProjectViewSetTest(APITestCase):
         self.assertTrue(ProjectInvitation.objects.filter(Q(owner=self.user_to_operations2) & Q(project=updated_proj)).exists())
 
     def test_invite_404(self):
-        url = reverse('permissions:project-detail', args=[self.project.id]) + 'invite/'
+        url = reverse('projects:project-detail', args=[self.project.id]) + 'invite/'
         data = {'invitations_list': [
             {'id': self.user_to_operations.id},
         ]}
-        url = reverse('permissions:project-detail', args=[1000000]) + 'invite/'
+        url = reverse('projects:project-detail', args=[1000000]) + 'invite/'
         self.client.force_authenticate(user=self.user_owner)
         resp = self.client.post(url, data)
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_project_invite_fail_auth_unauthorized(self):
-        url = reverse('permissions:project-detail', args=[self.project.id]) + 'invite/'
+        url = reverse('projects:project-detail', args=[self.project.id]) + 'invite/'
         data = {'invitations_list': [
             {'id': self.user_to_operations.id},
         ]}
@@ -245,7 +245,7 @@ class ProjectViewSetTest(APITestCase):
 
     def test_proj_get_invitations(self):
         inv = ProjectInvitation.objects.create(owner=self.user_to_operations, project=self.project_to_update)
-        url = reverse('permissions:project-detail', args=[self.project_to_update.id]) + 'get_invitations/'
+        url = reverse('projects:project-detail', args=[self.project_to_update.id]) + 'get_invitations/'
         self.client.force_authenticate(user=self.user_owner)
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
@@ -254,7 +254,7 @@ class ProjectViewSetTest(APITestCase):
         self.assertTrue('is_accepted' in resp.data[0])
 
     def test_remove_participants(self):
-        url = reverse('permissions:project-detail', args=[self.project.id]) + 'remove_participants/'
+        url = reverse('projects:project-detail', args=[self.project.id]) + 'remove_participants/'
         self.project.add_participant(self.user_to_operations)
         data = {
             'to_remove_list' :[
@@ -267,7 +267,7 @@ class ProjectViewSetTest(APITestCase):
         self.assertTrue(self.user_to_operations not in self.project.participants.all())
 
     def test_remove_participants_fail_auth_unauthorized(self):
-        url = reverse('permissions:project-detail', args=[self.project.id]) + 'remove_participants/'
+        url = reverse('projects:project-detail', args=[self.project.id]) + 'remove_participants/'
         self.client.force_authenticate(user=self.user_not_owner)
         data = {
             'to_remove_list': [
@@ -278,7 +278,7 @@ class ProjectViewSetTest(APITestCase):
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_remove_participants_404(self):
-        url = reverse('permissions:project-detail', args=[100000]) + 'remove_participants/'
+        url = reverse('projects:project-detail', args=[100000]) + 'remove_participants/'
         self.client.force_authenticate(user=self.user_owner)
         data = {
             'to_remove_list': [
@@ -327,7 +327,7 @@ class InvitationViewSetTest(APITestCase):
         )
 
     def test_list(self):
-        url= reverse('permissions:invitations-list')
+        url= reverse('projects:invitations-list')
         self.client.force_authenticate(user=self.user_to_operations)
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
@@ -337,7 +337,7 @@ class InvitationViewSetTest(APITestCase):
         self.assertTrue('id' in resp.data[0])
 
     def test_destroy_invited(self):
-        url = reverse('permissions:invitations-detail', args=[self.invitation.id])
+        url = reverse('projects:invitations-detail', args=[self.invitation.id])
         self.client.force_authenticate(user=self.user_to_operations)
         resp = self.client.delete(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
@@ -345,28 +345,28 @@ class InvitationViewSetTest(APITestCase):
 
 
     def test_destroy_inviting(self):
-        url = reverse('permissions:invitations-detail', args=[self.invitation.id])
+        url = reverse('projects:invitations-detail', args=[self.invitation.id])
         self.client.force_authenticate(user=self.user_owner)
         resp = self.client.delete(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertFalse(ProjectInvitation.objects.filter(pk=self.invitation.id).exists())
 
     def test_destroy_unauthorized(self):
-        url = reverse('permissions:invitations-detail', args=[self.invitation.id])
+        url = reverse('projects:invitations-detail', args=[self.invitation.id])
         self.client.force_authenticate(user=self.user_not_authorized)
         resp = self.client.delete(url)
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
         self.assertTrue(ProjectInvitation.objects.filter(pk=self.invitation.id).exists())
 
     def test_destroy_404(self):
-        url = reverse('permissions:invitations-detail', args=[100000])
+        url = reverse('projects:invitations-detail', args=[100000])
         self.client.force_authenticate(user=self.user_to_operations)
         resp = self.client.delete(url)
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_accept(self):
         self.assertFalse(self.user_to_operations in self.project.participants.all())
-        url = reverse('permissions:invitations-detail', args=[self.invitation.id]) + 'accept/'
+        url = reverse('projects:invitations-detail', args=[self.invitation.id]) + 'accept/'
         self.client.force_authenticate(user=self.user_to_operations)
         resp = self.client.get(url)
         updated_inv = ProjectInvitation.objects.get(pk = self.invitation.id)
@@ -375,13 +375,13 @@ class InvitationViewSetTest(APITestCase):
         self.assertEqual(updated_inv.is_accepted, True)
 
     def test_accept_404(self):
-        url = reverse('permissions:invitations-detail', args=[100000]) + 'accept/'
+        url = reverse('projects:invitations-detail', args=[100000]) + 'accept/'
         self.client.force_authenticate(user=self.user_to_operations)
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_accept_unauthorized(self):
-        url = reverse('permissions:invitations-detail', args=[self.invitation.id]) + 'accept/'
+        url = reverse('projects:invitations-detail', args=[self.invitation.id]) + 'accept/'
         self.client.force_authenticate(user=self.user_not_authorized)
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)

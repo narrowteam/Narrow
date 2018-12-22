@@ -12,6 +12,7 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = (
+            'pk',
             'project',
             'parent_task',
             'name',
@@ -20,6 +21,9 @@ class TaskSerializer(serializers.ModelSerializer):
             'updated_at'
         )
         extra_kwargs = {
+            'pk': {
+                'required': True
+            },
             'description': {
                 'required': False
             },

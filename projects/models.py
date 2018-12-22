@@ -74,29 +74,6 @@ class Group(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-class Permission(models.Model):
-    owner = models.ForeignKey(
-        'UserManagement.User',
-        on_delete=models.CASCADE,
-    )
-    # target = models.ForeignKey(
-    #
-    # )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    # type #will clarify in future
-    # target = owner = models.ForeignKey(
-    #   'tasks.Task',
-    #   on_delete = models.CASCADE,
-    # )
-
-class GroupPermission(models.Model):
-    owner = models.ForeignKey(
-        'Group',
-        on_delete=models.CASCADE,
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
 class ProjectInvitation(models.Model):
     owner = models.ForeignKey(

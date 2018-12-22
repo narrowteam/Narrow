@@ -23,7 +23,7 @@ class Task(models.Model):
     objects = TaskManager()
 
     project = models.ForeignKey(
-        'permissions.Project',
+        'projects.Project',
         related_name='main_task',
         on_delete=models.CASCADE
     )
@@ -43,5 +43,6 @@ class Task(models.Model):
     def push_sub_task(self, **validated_data):
         new_task = Task.objects.create(self, **validated_data)
         return new_task
+
 
 
