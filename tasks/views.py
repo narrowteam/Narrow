@@ -4,8 +4,8 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 
-from tasks.serializers import TaskSerializer
-from tasks.models import Task
+from tasks.serializers import TaskSerializer, TaskPermissionSerializer
+from tasks.models import Task, TaskPermission
 
 from rest_framework import viewsets, mixins
 
@@ -70,6 +70,39 @@ class TaskViewSet(mixins.RetrieveModelMixin,
         # elif self.action == 'get_project_tasks':
         #     permission_classes = [IsAuthenticated]
         # else:
+        permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
+    def get_queryset(self):
+        return self.queryset
+
+
+class TaskPermissionViewSet(mixins.CreateModelMixin,
+                            mixins.DestroyModelMixin,
+                            viewsets.GenericViewSet):
+    queryset = TaskPermission.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        serializer = TaskPermissionSerializer(data=request.data)
+        if serializer.is_valid(): # Needs validation if project exists
+            serializer.save()
+            return Response(serializer.validated_data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+    def destory(self, request, pk=None):
+        permission = get_object_or_404(self.queryset, pk=pk)
+        self.check_object_permissions(request, permission)
+        permission.delete()
+        return Response(status=status.HTTP_200_OK)
+
+    def get_permissions(self):
+
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        """
+        # if self.action == 'retrieve':
+        #     permission_classes = [IsOwnerOrParticipant]
         permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 

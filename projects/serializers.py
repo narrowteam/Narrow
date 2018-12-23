@@ -42,7 +42,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 class ProjectDetailSerializer(ProjectSerializer):
     participants = UserSerializer(required=False, many=True)
     owner = UserSerializer(required=False)
-    main_task = TaskSerializer(read_only=True)
+    main_task = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
@@ -74,6 +74,11 @@ class ProjectDetailSerializer(ProjectSerializer):
                 'read_only': True
             },
         }
+
+    def get_main_task(self, obj):
+        task = obj.assignedTasks.get(is_main=True)
+        return TaskSerializer(task).data
+
 
 class ProjectPatchSerializer(ProjectSerializer):
     class Meta:

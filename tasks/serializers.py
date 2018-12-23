@@ -12,7 +12,6 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = (
-            'pk',
             'project',
             'parent_task',
             'name',
@@ -21,9 +20,6 @@ class TaskSerializer(serializers.ModelSerializer):
             'updated_at'
         )
         extra_kwargs = {
-            'pk': {
-                'required': True
-            },
             'description': {
                 'required': False
             },
@@ -37,6 +33,16 @@ class TaskSerializer(serializers.ModelSerializer):
                 'read_only': True
             }
         }
+
+class TaskPermissionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = (
+            'owner',
+            'target',
+            'permission_type',
+        )
+
 
 
 
