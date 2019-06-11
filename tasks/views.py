@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 
 from tasks.serializers import TaskSerializer, TaskPermissionSerializer
 from tasks.models import Task, TaskPermission
+from tasks.permissions import IsEditor, IsPermittedToManagePermissions
 
 from rest_framework import viewsets, mixins
 
@@ -63,14 +64,7 @@ class TaskViewSet(mixins.RetrieveModelMixin,
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        # if self.action == 'retrieve':
-        #     permission_classes = [IsOwnerOrParticipant]
-        # if self.action == 'create' or self.action == 'destroy' or self.action == 'retrieve' :
-        #     permission_classes = [IsAuthenticated]
-        # elif self.action == 'get_project_tasks':
-        #     permission_classes = [IsAuthenticated]
-        # else:
-        permission_classes = [IsAuthenticated]
+        permission_classes = [IsEditor]
         return [permission() for permission in permission_classes]
 
     def get_queryset(self):
@@ -97,13 +91,7 @@ class TaskPermissionViewSet(mixins.CreateModelMixin,
         return Response(status=status.HTTP_200_OK)
 
     def get_permissions(self):
-
-        """
-        Instantiates and returns the list of permissions that this view requires.
-        """
-        # if self.action == 'retrieve':
-        #     permission_classes = [IsOwnerOrParticipant]
-        permission_classes = [IsAuthenticated]
+        permission_classes = [IsPermittedToManagePermissions]
         return [permission() for permission in permission_classes]
 
     def get_queryset(self):

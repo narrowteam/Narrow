@@ -11,6 +11,7 @@ from tasks.serializers import TaskSerializer
 class ProjectSerializer(serializers.ModelSerializer):
     participants__count = serializers.IntegerField(required=False)
     owner = UserSerializer(required=False)
+
     class Meta:
         model = Project
         fields = (

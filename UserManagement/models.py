@@ -1,7 +1,16 @@
 from django.db import models
-
-from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+
+
+class UserSettings(models.Model):
+    owner = models.OneToOneField(
+        'User',
+        on_delete=models.CASCADE,
+        related_name='settings'
+    )
+    email_notifications_on_events = models.BooleanField(
+        default=True,
+    )
 
 
 class MyUserManager(BaseUserManager):
@@ -17,7 +26,7 @@ class MyUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_user(self, **validated_data):
+    def create(self, **validated_data):
         if validated_data['first_name']:
             validated_data['first_name'] = validated_data['first_name'].capitalize()
         if validated_data['last_name']:
@@ -26,6 +35,7 @@ class MyUserManager(BaseUserManager):
         user = self.model(**validated_data)
         user.set_password(validated_data['password'])
         user.save(using=self._db)
+        UserSettings.objects.create(owner=user)
         return user
 
 
@@ -64,22 +74,15 @@ class User(AbstractBaseUser):
         return self.is_staff
 
     def update_user(self, **validated_data):
-        if validated_data['first_name']:
+        if 'first_name' in validated_data:
             validated_data['first_name'] = validated_data['first_name'].capitalize()
-        if validated_data['last_name']:
+        if 'last_name' in validated_data:
             validated_data['last_name'] = validated_data['last_name'].capitalize()
 
         for attr, value in validated_data.items():
-            if attr == 'password':
-                self.set_password(value)
-            else:
-                setattr(self, attr, value)
+            setattr(self, attr, value)
         self.save()
-    #
-    # def clean(self, *args, **kwargs):
-    #   # add custom validation here
-    #   super(User, self).clean(*args, **kwargs)
-    #
-    # def save(self, *args, **kwargs):
-    #   self.full_clean()
-    #   super(User, self).save(*args, **kwargs)
+
+
+
+

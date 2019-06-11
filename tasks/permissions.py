@@ -37,7 +37,8 @@ class IsPermittedToManagePermissions:
         return True
 
     def has_object_permission(self, request, view, obj):
-        project = Task.objects.filter(pk=obj.target.pk)
+        task = Task.objects.get(pk=obj.target.pk)
+        project = Project.objects.get(id=task.project.id)
 
         # Only project owner is permitted
         return request.user == project.owner

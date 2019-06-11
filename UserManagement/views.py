@@ -6,9 +6,11 @@ from .permissions import IsSelf
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 
-from .serializers import UserSerializer, UserPatchSerializer
+from .serializers import UserSerializer, UserPatchSerializer, UserSetPasswordSerializer
 from .models import User
 from django.db.models import Q, Subquery
+from rest_framework.decorators import action
+# from rest_framework.generics import CreateAPIView, UpdateAPIView,
 
 
 class UserViewSet(viewsets.ViewSet):
@@ -25,17 +27,37 @@ class UserViewSet(viewsets.ViewSet):
             return Response(serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
     # Allows to update all user attributes
-    def partial_update(self, request, pk=None):
-        user = User.objects.get(id=pk)
-        self.check_object_permissions(self.request, user)
-
-        serializer = UserPatchSerializer(data=request.data)
+    def customize(self, request):
+        user = get_object_or_404(self.queryset, id=request.user.id)
+        serializer = UserPatchSerializer(user, data=request.data)
 
         if serializer.is_valid():
-            serializer.update(user, serializer.validated_data) #check it to use save
+            serializer.save()  # check it to use save
             return Response(status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+    def retrieve(self, request, pk=None):
+        user = get_object_or_404(self.queryset, id=pk)
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def self_retrieve(self, request):
+        user = get_object_or_404(self.queryset, id=request.user.id)
+        serializer = UserPatchSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["POST"])
+    def set_password(self, request):
+        user = get_object_or_404(self.queryset, id=request.user.id)
+        serializer = UserSetPasswordSerializer(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+
 
     def get_permissions(self):
         """
@@ -46,13 +68,3 @@ class UserViewSet(viewsets.ViewSet):
         else:
             permission_classes = [IsAuthenticated, IsSelf]
         return [permission() for permission in permission_classes]
-
-    # WONT BE USED THAT WAY
-    # def retrieve(self, request, pk=None):
-    #   user = get_object_or_404(self.queryset, id=pk)
-    #   print("IM HERE")
-    #   serializer = UserSerializer(user)
-    #   return Response(serializer.data)
-    # def list(self, request):
-    #   serializer = UserSerializer(self.queryset, many=True)
-    #   return Response(serializer.data)
