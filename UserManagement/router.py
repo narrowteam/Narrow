@@ -1,14 +1,19 @@
 from django.urls import path
 from . import views
-from rest_framework.routers import SimpleRouter, DefaultRouter
-
 from rest_framework.routers import Route, DynamicRoute, SimpleRouter
+
 
 class CustomRouter(SimpleRouter):
     """
     A router for browsing user and managing self
     """
     routes = [
+        DynamicRoute(
+            url=r'^{prefix}/{url_path}{trailing_slash}$',
+            name='{basename}-{url_name}',
+            detail=False,
+            initkwargs={}
+        ),
         Route(
             url=r'^{prefix}{trailing_slash}$',
             mapping={
@@ -27,15 +32,12 @@ class CustomRouter(SimpleRouter):
             detail=True,
             initkwargs={'suffix': 'detail'}
         ),
-        DynamicRoute(
-            url=r'^{prefix}/{url_path}{trailing_slash}$',
-            name='{basename}-{url_name}',
-            detail=False,
-            initkwargs={}
-        ),
+
     ]
 
 
 router = CustomRouter()
-router.register(r'', views.UserViewSet)
+v = views.UserViewSet
+router.register(r'', v)
 urlpatterns = router.urls
+print("Patterns", urlpatterns)

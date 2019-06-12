@@ -11,12 +11,12 @@ from django.db.models import Q
 
 class ProjectTest(TestCase):
     def setUp(self):
-        self.user_owner = User.objects.create_user(email='test_email@gmail.com',
+        self.user_owner = User.objects.create(email='test_email@gmail.com',
                                         first_name='aDam',
                                         last_name='Smith',
                                         password='!*&!*(HN'
                                         )
-        self.user_to_operations = User.objects.create_user(email='2test_email@gmail.com',
+        self.user_to_operations = User.objects.create(email='2test_email@gmail.com',
                                         first_name='aDam',
                                         last_name='Smith',
                                         password='!*&!*(HN'
@@ -46,12 +46,12 @@ class ProjectTest(TestCase):
 
 class InvitationTest(TestCase):
     def setUp(self):
-        self.user_owner = User.objects.create_user(email='test_email@gmail.com',
+        self.user_owner = User.objects.create(email='test_email@gmail.com',
                                         first_name='aDam',
                                         last_name='Smith',
                                         password='!*&!*(HN'
                                         )
-        self.user_to_operations = User.objects.create_user(email='2test_email@gmail.com',
+        self.user_to_operations = User.objects.create(email='2test_email@gmail.com',
                                         first_name='aDam',
                                         last_name='Smith',
                                         password='!*&!*(HN'
@@ -78,22 +78,22 @@ class InvitationTest(TestCase):
 
 class ProjectViewSetTest(APITestCase):
     def setUp(self):
-        self.user_owner = User.objects.create_user(email='test_email@gmail.com',
+        self.user_owner = User.objects.create(email='test_email@gmail.com',
                                                    first_name='aDam',
                                                    last_name='Smith',
                                                    password='!*&!*(HN'
                                                    )
-        self.user_to_operations = User.objects.create_user(email='2test_email@gmail.com',
+        self.user_to_operations = User.objects.create(email='2test_email@gmail.com',
                                                            first_name='aDam',
                                                            last_name='Smith',
                                                            password='!*&!*(HN'
                                                            )
-        self.user_to_operations2 = User.objects.create_user(email='test_inv2_email@gmail.com',
+        self.user_to_operations2 = User.objects.create(email='test_inv2_email@gmail.com',
                                                         first_name='aDam',
                                                         last_name='Smith',
                                                         password='!*&!*(HN'
                                                         )
-        self.user_not_owner = User.objects.create_user(email='3test_email@gmail.com',
+        self.user_not_owner = User.objects.create(email='3test_email@gmail.com',
                                                            first_name='aDam',
                                                            last_name='Smith',
                                                            password='!*&!*(HN'
@@ -293,17 +293,17 @@ class ProjectViewSetTest(APITestCase):
 
 class InvitationViewSetTest(APITestCase):
     def setUp(self):
-        self.user_owner = User.objects.create_user(email='test_email@gmail.com',
+        self.user_owner = User.objects.create(email='test_email@gmail.com',
                                                   first_name='aDam',
                                                   last_name='Smith',
                                                   password='!*&!*(HN'
                                                   )
-        self.user_to_operations = User.objects.create_user(email='2test_email@gmail.com',
+        self.user_to_operations = User.objects.create(email='2test_email@gmail.com',
                                                            first_name='aDam',
                                                            last_name='Smith',
                                                            password='!*&!*(HN'
                                                            )
-        self.user_not_authorized = User.objects.create_user(email='3test_email@gmail.com',
+        self.user_not_authorized = User.objects.create(email='3test_email@gmail.com',
                                                            first_name='aDam',
                                                            last_name='Smith',
                                                            password='!*&!*(HN'

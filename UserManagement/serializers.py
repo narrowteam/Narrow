@@ -50,14 +50,24 @@ class UserPatchSerializer(serializers.ModelSerializer):
 
 
 
-class UserSetPasswordSerializer(UserSerializer):
-    password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+class UserSetPasswordSerializer(serializers.Serializer):
+    current_password = serializers.CharField(style={'input_type': 'current_password'}, write_only=True)
     new_password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
 
-    def update(self, instance, validated_data):
-        instance.set_password(validated_data['new_password'])
-        return instance
+    def save(self):
+        user = self.context.get("user")
+        user.set_password(self.validated_data['new_password'])
+        user.save()
+        return user
 
-    def validate_password(self, data):
+    def validate_new_password(self, data):
         validators.validate_password(password=data, user=User)
+        user = self.context.get("user")
+        if user.check_password(data):
+            raise serializers.ValidationError("New password must be different")
         return data
+
+    def validate_current_password(self, data):
+        user = self.context.get("user")
+        if not user.check_password(data):
+            raise serializers.ValidationError("Wrong password")

@@ -14,8 +14,17 @@ from rest_framework.decorators import action
 
 
 class UserViewSet(viewsets.ViewSet):
-    permission_classes = (AllowAny,)
     queryset = User.objects.all()
+
+    @action(methods=['post'], detail=False,  url_path='set_password')
+    def set_password(self, request):
+        serializer = UserSetPasswordSerializer(
+            request.user, data=request.data, context={'user': request.user})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
     # Creates new user
     def create(self, request):
@@ -46,16 +55,6 @@ class UserViewSet(viewsets.ViewSet):
         user = get_object_or_404(self.queryset, id=request.user.id)
         serializer = UserPatchSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(detail=False, methods=["POST"])
-    def set_password(self, request):
-        user = get_object_or_404(self.queryset, id=request.user.id)
-        serializer = UserSetPasswordSerializer(user, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
 
