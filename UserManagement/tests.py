@@ -120,11 +120,24 @@ class UserViewSet(APITestCase):
         self.assertEqual(user.last_name, data['last_name'])
 
     def test_set_password_positive(self):
-        url = '/user/set_password'
+        url = '/user/set_password/'
         data = {
-            'old_password': self.test_data['password'],
-            'new_password': "xD123@1"
+            'current_password': self.test_data['password'],
+            'new_password': "xD123@1!a"
         }
         self.client.force_authenticate(user=self.test_user)
         reponse = self.client.post(url, data)
         self.assertEqual(reponse.status_code, status.HTTP_200_OK)
+        self.assertTrue(self.test_user.check_password("xD123@1!a"))
+
+    def test_set_password__fail_invalid_current_password(self):
+        url = '/user/set_password/'
+        data = {
+            'current_password': self.test_data['password'] + 'a',
+            'new_password': "xD123@1!a"
+        }
+        self.client.force_authenticate(user=self.test_user)
+        reponse = self.client.post(url, data)
+
+        self.assertEqual(reponse.status_code, status.HTTP_406_NOT_ACCEPTABLE)
+
