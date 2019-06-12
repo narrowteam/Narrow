@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from .models import Project, ProjectInvitation
-from UserManagement.serializers import UserSerializer
+from UserManagement.serializers import UserSerializer, BasicUserDataSerializer
 from UserManagement.models import User
 from django.db.models import Q, Subquery
 from utils.parsers import EmailOrIdUserList
@@ -10,7 +10,7 @@ from tasks.serializers import TaskSerializer
 
 class ProjectSerializer(serializers.ModelSerializer):
     participants__count = serializers.IntegerField(required=False)
-    owner = UserSerializer(required=False)
+    owner = BasicUserDataSerializer(required=False)
 
     class Meta:
         model = Project
@@ -41,8 +41,8 @@ class ProjectSerializer(serializers.ModelSerializer):
         }
 
 class ProjectDetailSerializer(ProjectSerializer):
-    participants = UserSerializer(required=False, many=True)
-    owner = UserSerializer(required=False)
+    participants = BasicUserDataSerializer(required=False, many=True)
+    owner = BasicUserDataSerializer(required=False)
     main_task = serializers.SerializerMethodField()
 
     class Meta:
@@ -156,7 +156,7 @@ class UsersToRemoveListSerializer(serializers.Serializer):
 # Serializer only for read
 class InvitationListSerializer(serializers.ModelSerializer):
     project = ProjectSerializer(required=False)
-    owner = UserSerializer(required=False)
+    owner = BasicUserDataSerializer(required=False)
 
     class Meta:
         model = ProjectInvitation()

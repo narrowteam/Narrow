@@ -18,6 +18,21 @@ class UserSerializer(serializers.ModelSerializer):
         return data
 
 
+class BasicUserDataSerializer(serializers.Serializer):
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    email = serializers.SerializerMethodField()
+    profile_img = serializers.CharField()
+
+    def get_email(self, obj):
+        if obj.settings.is_email_public:
+            return obj.email
+        else:
+            return "User's e-mail is private"
+
+
+
+
 class UserSettingsSerializer(serializers.ModelSerializer):
 
     class Meta:

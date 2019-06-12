@@ -11,6 +11,9 @@ class UserSettings(models.Model):
     email_notifications_on_events = models.BooleanField(
         default=True,
     )
+    is_email_public = models.BooleanField(
+        default=False,
+    )
 
 
 class MyUserManager(BaseUserManager):

@@ -6,11 +6,11 @@ from .permissions import IsSelf
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 
-from .serializers import UserSerializer, UserPatchSerializer, UserSetPasswordSerializer
+from .serializers import UserSerializer, UserPatchSerializer, UserSetPasswordSerializer, BasicUserDataSerializer
 from .models import User
 from django.db.models import Q, Subquery
 from rest_framework.decorators import action
-# from rest_framework.generics import CreateAPIView, UpdateAPIView,
+
 
 
 class UserViewSet(viewsets.ViewSet):
@@ -48,15 +48,13 @@ class UserViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, pk=None):
         user = get_object_or_404(self.queryset, id=pk)
-        serializer = UserSerializer(user)
+        serializer = BasicUserDataSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def self_retrieve(self, request):
         user = get_object_or_404(self.queryset, id=request.user.id)
         serializer = UserPatchSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-
 
     def get_permissions(self):
         """

@@ -97,18 +97,16 @@ class ProjectViewSet(ViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        # if self.action == 'retrieve':
-        #     permission_classes = [IsOwnerOrParticipant]
-        if self.action == 'create':
-            permission_classes = [IsAuthenticated]
-        elif self.action == 'retrieve':
-            permission_classes = [IsOwnerOrParticipant]
+        permission_classes = [IsAuthenticated]
+        if self.action == 'retrieve':
+            permission_classes.append(IsOwnerOrParticipant)
         else:
-            permission_classes = [IsOwner]
+            permission_classes.append(IsOwner)
         return [permission() for permission in permission_classes]
 
     def get_queryset(self):
         return self.queryset
+
 
 class InvitationViewSet(GenericViewSet):
     queryset = ProjectInvitation.objects.all()
