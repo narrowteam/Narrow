@@ -37,11 +37,10 @@ class BasicUserDataSerializer(serializers.Serializer):
 
     def get_profile_img(self, obj):
         try:
-            img_path = obj.profileImage.url
+            img_url = obj.profileImage.get_absolute_url()
         except ProfileImage.DoesNotExist:
             return None
-        domain = settings.CDN_DOMAIN
-        return domain + img_path
+        return img_url
 
 
 

@@ -1,11 +1,11 @@
 from django.urls import path, include
-from .views import get_public_image
+from .views import get_profile_picture
 
 
 pictures_urls = [
-    path('profile_pictures/<str:name>/', get_public_image),
+    path('profile_images/<str:name>/', get_profile_picture),
 ]
 
 urlpatterns = [
-    path('pictures/', include(pictures_urls))
+    path('images/', include(pictures_urls))
 ]

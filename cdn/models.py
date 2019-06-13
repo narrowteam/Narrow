@@ -1,6 +1,8 @@
 from django.db import models
 from datetime import datetime
 import os
+from . import config
+from django.conf import settings
 
 
 class ImageManager(models.Manager):
@@ -21,7 +23,7 @@ class ProfileImage(models.Model):
         on_delete=models.CASCADE,
         related_name='profileImage'
     )
-    image = models.ImageField(upload_to='cdn_data/pictures/profile_pictures')
+    image = models.ImageField(upload_to=f'{settings.CDN_ROOT_RELATIVE}/{config.PROFILE_IMAGES_PATH}')
     url = models.TextField(max_length=5000)
     name = models.TextField(max_length=5000)
 
@@ -40,12 +42,15 @@ class ProfileImage(models.Model):
         self.set_url()
 
     def set_url(self):
-        self.url = f'/cdn_data/pictures/profile_pictures/{self.name}'
+        self.url = f'{config.PROFILE_IMAGES_PATH}/{self.name}'
 
     def update(self, **validated_data):
         self.set_image(validated_data["profile_image"])
         self.save()
         return self
+
+    def get_absolute_url(self):
+        return settings.CDN_URL + self.url
 
 
 

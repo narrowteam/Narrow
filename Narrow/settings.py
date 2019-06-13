@@ -20,6 +20,12 @@ except:
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+PROJECT_DIR = os.path.abspath(os.path.dirname(__file__))
+CDN_FOLDER = 'cdn_data'
+CDN_ROOT_RELATIVE = os.path.join('Narrow/', CDN_FOLDER)
+CDN_ROOT = os.path.join(PROJECT_DIR, CDN_FOLDER)
+CDN_URL = '127.0.0.1:8000/cdn'
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
@@ -32,9 +38,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-CDN_DOMAIN = ""
-if CDN_DOMAIN == "":
-    CDN_DOMAIN = '127.0.0.1:8000/cdn'
+
 
 # Application definition
 
@@ -139,6 +143,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (

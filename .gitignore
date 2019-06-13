@@ -15,6 +15,7 @@ __pycache__/
 Narrow/secret_settings.py
 
 cdn_data/
+Narrow/cdn_data/
 
 # C extensions
 *.so

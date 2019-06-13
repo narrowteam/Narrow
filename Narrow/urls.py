@@ -27,5 +27,5 @@ urlpatterns = [
     path('user/', include(('UserManagement.router', 'UserManagement'), namespace='user'), ),
     path('projects/', include(('projects.router', 'projects'),  namespace='projects'),),
     path('tasks/', include(('tasks.router', 'tasks'),  namespace='tasks'),),
-    path('cdn/cdn_data/', include('cdn.urls')),
+    path('cdn/', include('cdn.urls')),
 ]
