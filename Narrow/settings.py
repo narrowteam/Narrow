@@ -32,6 +32,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+CDN_DOMAIN = ""
+if CDN_DOMAIN == "":
+    CDN_DOMAIN = '127.0.0.1:8000/cdn'
 
 # Application definition
 

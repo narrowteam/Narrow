@@ -30,7 +30,7 @@ class ProfileImage(models.Model):
             print("First you need to set image owner")
             raise AttributeError
         filename, extenstion = os.path.splitext(img.name)
-        self.name = f'{self.owner.id}_{datetime.now()}_profile_pic{extenstion}'
+        self.name = f'{self.owner.id}_profile_pic{extenstion}'
         img.name = self.name
         return img
 
@@ -40,9 +40,7 @@ class ProfileImage(models.Model):
         self.set_url()
 
     def set_url(self):
-        self.url = f'/cdn/{self.name}'
-        return self
-
+        self.url = f'/cdn_data/pictures/profile_pictures/{self.name}'
 
     def update(self, **validated_data):
         self.set_image(validated_data["profile_image"])

@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import User, UserSettings
 import django.contrib.auth.password_validation as validators
 from cdn.models import ProfileImage
+from django.conf import settings
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -26,13 +27,22 @@ class BasicUserDataSerializer(serializers.Serializer):
     first_name = serializers.CharField(read_only=True)
     last_name = serializers.CharField(read_only=True)
     email = serializers.SerializerMethodField(read_only=True)
-    profile_img = serializers.ImageField(read_only=True)
+    profile_img = serializers.SerializerMethodField(read_only=True)
 
     def get_email(self, obj):
         if obj.settings.is_email_public:
             return obj.email
         else:
             return "User's e-mail is private"
+
+    def get_profile_img(self, obj):
+        try:
+            img_path = obj.profileImage.url
+        except ProfileImage.DoesNotExist:
+            return None
+        domain = settings.CDN_DOMAIN
+        return domain + img_path
+
 
 
 class UserSettingsSerializer(serializers.ModelSerializer):

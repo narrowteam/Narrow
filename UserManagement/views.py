@@ -58,7 +58,6 @@ class UserViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, pk=None):
         user = get_object_or_404(self.queryset, id=pk)
-        print(user.profile_image)
         serializer = BasicUserDataSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
