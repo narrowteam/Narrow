@@ -51,7 +51,6 @@ class User(AbstractBaseUser):
     last_name = models.CharField(
         max_length=127, unique=False, blank=False, null=False)
     registration_datetime = models.DateTimeField(auto_now=True)
-    profile_img = models.URLField(max_length=10000, blank=True, null=True)
     is_staff = models.BooleanField(default=False)
 
     objects = MyUserManager()

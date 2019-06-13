@@ -39,6 +39,7 @@ NARROW_APPS = [
     'UserManagement.apps.UsermanagementConfig',
     'projects.apps.ProjectsConfig',
     'tasks.apps.TasksConfig',
+    'cdn.apps.CdnConfig',
 ]
 
 INSTALLED_APPS = NARROW_APPS + [

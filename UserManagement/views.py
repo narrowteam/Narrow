@@ -6,7 +6,8 @@ from .permissions import IsSelf
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 
-from .serializers import UserSerializer, UserPatchSerializer, UserSetPasswordSerializer, BasicUserDataSerializer
+from .serializers import UserSerializer, UserPatchSerializer, UserSetPasswordSerializer, \
+    BasicUserDataSerializer, ImageUploadSerializer
 from .models import User
 from django.db.models import Q, Subquery
 from rest_framework.decorators import action
@@ -15,6 +16,15 @@ from rest_framework.decorators import action
 
 class UserViewSet(viewsets.ViewSet):
     queryset = User.objects.all()
+
+    @action(methods=['post'], detail=False,  url_path='upload_image')
+    def upload_image(self, request):
+        serializer = ImageUploadSerializer(request.user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
     @action(methods=['post'], detail=False,  url_path='set_password')
     def set_password(self, request):
@@ -48,6 +58,7 @@ class UserViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, pk=None):
         user = get_object_or_404(self.queryset, id=pk)
+        print(user.profile_image)
         serializer = BasicUserDataSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
