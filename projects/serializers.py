@@ -43,7 +43,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 class ProjectDetailSerializer(ProjectSerializer):
     participants = BasicUserDataSerializer(required=False, many=True)
     owner = BasicUserDataSerializer(required=False)
-    tasks = serializers.SerializerMethodField()
+    assignedTasks = TaskSerializer(read_only=True, many=True)
 
     class Meta:
         model = Project
@@ -53,7 +53,7 @@ class ProjectDetailSerializer(ProjectSerializer):
             'project_name',
             'description',
             'participants',
-            'tasks',
+            'assignedTasks',
         )
         extra_kwargs = {
             'id': {
@@ -75,16 +75,6 @@ class ProjectDetailSerializer(ProjectSerializer):
                 'read_only': True
             },
         }
-
-    def get_tasks(self, obj):
-        try:
-            user = self.context.get('request').user
-        except AttributeError:
-            print("Provide request in context")
-            raise
-        main_task = obj.assignedTasks.get(is_main=True)
-        tasks = main_task.get_sub_tasks_user_is_permitted_to_view(user)
-        return TaskSerializer(tasks, many=True).data
 
 
 class ProjectPatchSerializer(ProjectSerializer):

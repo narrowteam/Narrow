@@ -58,8 +58,17 @@ class UserPatchSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('settings', 'profile_img')
+        fields = ('id', 'first_name', 'last_name', 'settings', 'profile_img')
         extra_kwargs = {
+            'id': {
+                'read_only': True
+            },
+            'first_name': {
+                'read_only': True
+            },
+            "last_name": {
+                'read_only': True
+            },
         }
 
     def create(self, validated_data):

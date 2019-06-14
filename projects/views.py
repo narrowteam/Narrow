@@ -19,7 +19,7 @@ class ProjectViewSet(ViewSet):
     queryset = Project.objects.all()
 
     def create(self, request):
-        serializer = ProjectDetailSerializer(data=request.data)
+        serializer = ProjectDetailSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save(owner=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
