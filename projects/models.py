@@ -11,18 +11,7 @@ class ProjectManager(models.Manager):
         project.save(using=self._db)
         # Auto adds owner as participant of project
         project.participants.add(project.owner)
-        self.add_main_task_for_project(project, **validated_data)
-
         return project
-
-    def add_main_task_for_project(self, project, **validated_data):
-        task_data = {
-            'name': validated_data['project_name'],
-            'project': project
-        }
-        if 'description' in validated_data:
-            task_data['description'] = validated_data['description']
-        Task.objects.create_main_task(**task_data)
 
 
 

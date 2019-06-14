@@ -54,10 +54,11 @@ class UserSettingsSerializer(serializers.ModelSerializer):
 
 class UserPatchSerializer(serializers.ModelSerializer):
     settings = UserSettingsSerializer(required=False)
+    profile_img = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = User
-        fields = ('settings', )
+        fields = ('settings', 'profile_img')
         extra_kwargs = {
         }
 
@@ -68,6 +69,14 @@ class UserPatchSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         instance.update_user(**validated_data)
         return instance
+
+    def get_profile_img(self, obj):
+        try:
+            img_url = obj.profileImage.get_absolute_url()
+        except ProfileImage.DoesNotExist:
+            return None
+        return img_url
+
 
 
 class UserSetPasswordSerializer(serializers.Serializer):

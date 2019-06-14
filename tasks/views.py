@@ -6,7 +6,7 @@ from rest_framework.decorators import action
 
 from tasks.serializers import TaskSerializer, TaskPermissionSerializer
 from tasks.models import Task, TaskPermission
-from tasks.permissions import IsEditor, IsPermittedToManagePermissions
+from tasks.permissions import IsPermittedToEdit, IsPermittedToView, IsPermittedToManagePermissions
 
 from rest_framework import viewsets, mixins
 
@@ -19,7 +19,7 @@ class TaskViewSet(mixins.RetrieveModelMixin,
 
     queryset = Task.objects.all()
 
-    def create(self, request):
+    def create(self, request, pk=None):
         serializer = TaskSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -55,7 +55,7 @@ class TaskViewSet(mixins.RetrieveModelMixin,
         if serializer.is_valid():
             parent_task = get_object_or_404(self.queryset, pk=pk)
             parent_task.push_sub_task(**serializer.validated_data)
-            return Response(serializer.validated_data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
@@ -64,7 +64,11 @@ class TaskViewSet(mixins.RetrieveModelMixin,
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        permission_classes = [IsEditor]
+        if self.action == 'retrieve':
+            permission_classes = [IsPermittedToView]
+        else:
+            permission_classes = [IsPermittedToEdit]
+        permission_classes.append(IsAuthenticated)
         return [permission() for permission in permission_classes]
 
     def get_queryset(self):

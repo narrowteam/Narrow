@@ -36,7 +36,7 @@ class ProjectViewSet(ViewSet):
     def retrieve(self, request, pk=None):
         project = get_object_or_404(self.queryset, pk=pk)
         self.check_object_permissions(request, project)
-        serializer = ProjectDetailSerializer(project)
+        serializer = ProjectDetailSerializer(project, context={'request': request})
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
