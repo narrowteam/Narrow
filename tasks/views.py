@@ -3,37 +3,46 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
-
+from projects.models import Project
 from tasks.serializers import TaskSerializer, TaskPermissionSerializer
 from tasks.models import Task, TaskPermission
 from tasks.permissions import IsPermittedToEdit, IsPermittedToView, IsPermittedToManagePermissions
 
-from rest_framework import viewsets, mixins
+from rest_framework.viewsets import ViewSet
+from rest_framework import mixins, viewsets
 
 
-class TaskViewSet(mixins.RetrieveModelMixin,
-                    mixins.UpdateModelMixin,
-                    mixins.DestroyModelMixin,
-                    mixins.CreateModelMixin,
-                    viewsets.GenericViewSet):
+class TaskViewSet(ViewSet):
 
     queryset = Task.objects.all()
 
-    def create(self, request, pk=None):
-        serializer = TaskSerializer(data=request.data)
+    def create(self, request, project_id=None):
+        # TODO add project admin assigment option
+        project = get_object_or_404(Project.objects.all(), id=project_id, owner=request.user)
+        serializer = TaskSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(project=project)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
-    def destroy(self, request, pk=None):
-        project = get_object_or_404(self.queryset, pk=pk)
+    def list(self, request, project_id=None):
+        tasks = Task.objects.all().filter(
+            project=project_id,
+            taskPermission__in=TaskPermission.objects.filter(
+                owner=request.user
+            )
+        )
+        serializer = TaskSerializer(tasks, many=True)
+        return Response(serializer.data, status.HTTP_200_OK)
+
+    def destroy(self, request, project_id=None, task_id=None):
+        project = get_object_or_404(Project.objects.all(), id=project_id, owner=request.user)
         self.check_object_permissions(request, project)
         project.delete()
         return Response(status=status.HTTP_200_OK)
 
-    def retrieve(self, request, pk=None):
+    def retrieve(self, request, project_id=None, pk=None):
         project = get_object_or_404(self.queryset, pk=pk)
         self.check_object_permissions(request, project)
         serializer = TaskSerializer(project)
@@ -80,10 +89,11 @@ class TaskPermissionViewSet(mixins.CreateModelMixin,
                             viewsets.GenericViewSet):
     queryset = TaskPermission.objects.all()
 
-    def create(self, request, *args, **kwargs):
+    def create(self, request, project_id=None, *args, **kwargs):
+        project = get_object_or_404(Project.objects.all(), id=project_id)
         serializer = TaskPermissionSerializer(data=request.data)
         if serializer.is_valid(): # Needs validation if project exists
-            serializer.save()
+            serializer.save(project=project)
             return Response(serializer.validated_data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)

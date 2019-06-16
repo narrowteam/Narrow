@@ -6,26 +6,11 @@ from projects.models import Project
 class IsPermittedToEdit(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        return self.look_up_for_permission_in_task_tree(request.user, obj)
-
-    def look_up_for_permission_in_task_tree(self, user, obj):
-        permission = TaskPermission.objects.filter(
-            owner=user,
+        return TaskPermission.objects.filter(
+            owner=request.user,
             target=obj,
             permission_type='EDIT'
-        )
-        if permission.exists():
-            return True
-        else:
-           return self.check_parent(user, obj)
-
-    def check_parent(self, user, obj):
-        if obj.is_main:
-            return False
-        else:
-            parent_obj = Task.objects.get(id=obj.parent_id)
-            return self.look_up_in_task_tree(user, parent_obj)
-
+        ).exists()
 
     def has_permission(self, request, view):
         return True
@@ -34,25 +19,11 @@ class IsPermittedToEdit(permissions.BasePermission):
 class IsPermittedToView(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        return self.look_up_for_permission_in_task_tree(request.user, obj)
-
-    def look_up_for_permission_in_task_tree(self, user, obj):
-        permission = TaskPermission.objects.filter(
-            owner=user,
+        return TaskPermission.objects.filter(
+            owner=request.user,
             target=obj,
             permission_type='READ'
-        )
-        if permission.exists():
-            return True
-        else:
-            return self.check_parent(user, obj)
-
-    def check_parent(self, user, obj):
-        if obj.is_main:
-            return False
-        else:
-            parent_obj = Task.objects.get(id=obj.parent_id)
-            return self.look_up_in_task_tree(user, parent_obj)
+        ).exists()
 
     def has_permission(self, request, view):
         return True

@@ -26,6 +26,5 @@ urlpatterns = [
     url(r'^api-token-auth/', obtain_jwt_token),
     path('user/', include(('UserManagement.router', 'UserManagement'), namespace='user'), ),
     path('projects/', include(('projects.router', 'projects'),  namespace='projects'),),
-    path('tasks/', include(('tasks.router', 'tasks'),  namespace='tasks'),),
     path('cdn/', include('cdn.urls')),
 ]

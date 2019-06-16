@@ -25,9 +25,8 @@ class TaskPermission(models.Model):
 class TaskManager(models.Manager):
     use_in_migrations = True
 
-    def create(self, parent, **validated_data):
+    def create(self, **validated_data):
         task = self.model(**validated_data)
-        task.parent_task = parent
         task.save(using=self._db)
         return task
 
@@ -54,13 +53,14 @@ class Task(models.Model):
         return TaskPermission.objects.filter(target=self, owner=user).exists()
 
     def get_sub_tasks(self):
-        return Task.objects.sub_tasks
+        return self.sub_tasks
 
 
 class TaskPart(models.Model):
-    partent = models.ForeignKey(
+    parent = models.ForeignKey(
         'Task',
         on_delete=models.CASCADE,
+        related_name='sub_tasks'
 
     )
     name = models.TextField(max_length=1000)

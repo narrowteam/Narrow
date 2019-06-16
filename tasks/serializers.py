@@ -4,7 +4,7 @@ from UserManagement.serializers import UserSerializer
 from UserManagement.models import User
 from django.db.models import Q, Subquery
 
-from tasks.models import Task
+from tasks.models import Task, TaskPermission
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -15,12 +15,11 @@ class TaskSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'project',
-            'parent_task',
             'name',
             'description',
             'created_at',
             'updated_at',
-            'sub_tasks'
+            'sub_tasks',
         )
         extra_kwargs = {
             'id': {
@@ -43,13 +42,29 @@ class TaskSerializer(serializers.ModelSerializer):
             }
         }
 
+    def create(self, validated_data):
+        try:
+            task_creator = self.context.get('request').user
+        except AttributeError:
+            print("Provide request in context")
+            raise
+        task = Task.objects.create(**validated_data)
+        TaskPermission.objects.create(
+            owner=task_creator,
+            target=task,
+            permission_type="EDIT",
+        )
+        return task
+
     def get_sub_tasks(self, obj):
         sub_tasks = obj.get_sub_tasks()
         return TaskSerializer(sub_tasks, many=True).data
 
+
 class TaskPermissionSerializer(serializers.ModelSerializer):
 
     class Meta:
+        model =TaskPermission
         fields = (
             'owner',
             'target',
