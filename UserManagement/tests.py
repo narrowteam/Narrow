@@ -104,20 +104,20 @@ class UserViewSet(APITestCase):
                                          "password": ["This field is required."]
                                          })
 
-    def test_patch_positive(self):
-        url1 = '/user/'
-        data = {
-            'email': '3_test@gm.pl',
-            'first_name': 'Adamm',
-            "last_name": 'Smith'
-        }
-        self.client.force_authenticate(user=self.test_user)
-        response = self.client.patch(url1, data)
-        user = User.objects.get(email='3_test@gm.pl')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(user.email, data['email'])
-        self.assertEqual(user.first_name, data['first_name'])
-        self.assertEqual(user.last_name, data['last_name'])
+    # def test_patch_positive(self):
+    #     url1 = '/user/'
+    #     data = {
+    #         'email': '3_test@gm.pl',
+    #         'first_name': 'Adamm',
+    #         "last_name": 'Smith'
+    #     }
+    #     self.client.force_authenticate(user=self.test_user)
+    #     response = self.client.patch(url1, data)
+    #     user = User.objects.get(email='3_test@gm.pl')
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #     self.assertEqual(user.email, data['email'])
+    #     self.assertEqual(user.first_name, data['first_name'])
+    #     self.assertEqual(user.last_name, data['last_name'])
 
     def test_set_password_positive(self):
         url = '/user/set_password/'

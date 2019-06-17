@@ -36,14 +36,14 @@ class TaskViewSet(ViewSet):
         serializer = TaskSerializer(tasks, many=True)
         return Response(serializer.data, status.HTTP_200_OK)
 
-    def destroy(self, request, project_id=None, task_id=None):
-        project = get_object_or_404(Project.objects.all(), id=project_id, owner=request.user)
-        self.check_object_permissions(request, project)
-        project.delete()
+    def destroy(self, request, project_id=None, pk=None):
+        task = get_object_or_404(Task.objects.all(), project__id=project_id, id=pk)
+        self.check_object_permissions(request, task)
+        task.delete()
         return Response(status=status.HTTP_200_OK)
 
     def retrieve(self, request, project_id=None, pk=None):
-        project = get_object_or_404(self.queryset, pk=pk)
+        project = get_object_or_404(self.queryset, pk=pk, project=project_id)
         self.check_object_permissions(request, project)
         serializer = TaskSerializer(project)
         return Response(serializer.data, status=status.HTTP_200_OK)

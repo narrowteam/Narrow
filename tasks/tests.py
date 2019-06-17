@@ -42,21 +42,28 @@ class TaskViewTestCase(APITestCase):
             project_name="TestName",
             description="some description"
         )
-        self.test_project_main_task = Task.objects.get(
-            project=self.test_project,
-            is_main=True
-        )
 
-    def test_pushing_sub_task(self):
-        url = reverse('tasks:task-detail', args=[self.test_project_main_task.id]) + 'push_sub_task/'
-        dataset = {
-            'name': "test_task_1",
-            'description': "test_task_desc"
-        }
-        self.client.force_authenticate(self.test_user_1)
-        response = self.client.post(url, data=dataset)
-        print(response.data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue('name' in response.data)
-        self.assertTrue('description' in response.data)
+
+    def test_adding_task(self):
+        url = f'/projects/project_tasks/{self.test_project.id}/tasks/'
+            dataset = {
+                'name': "test_task_1",
+                'description': "test_task_desc"
+            }
+            self.client.force_authenticate(self.test_user_1)
+            response = self.client.post(url, data=dataset)
+
+
+    # def test_pushing_sub_task(self):
+    #     url = f'/projects/project_tasks/{self.test_project.id}/'
+    #     dataset = {
+    #         'name': "test_task_1",
+    #         'description': "test_task_desc"
+    #     }
+    #     self.client.force_authenticate(self.test_user_1)
+    #     response = self.client.post(url, data=dataset)
+    #     print(response.data)
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #     self.assertTrue('name' in response.data)
+    #     self.assertTrue('description' in response.data)
 

@@ -4,11 +4,22 @@ from UserManagement.serializers import UserSerializer
 from UserManagement.models import User
 from django.db.models import Q, Subquery
 
-from tasks.models import Task, TaskPermission
+from tasks.models import Task, TaskPermission, SubTask
+
+
+class SubTaskSerializer(serializers.Serializer):
+
+    class Meta:
+        model = SubTask
+        fields = (
+            'name',
+            'description',
+        )
 
 
 class TaskSerializer(serializers.ModelSerializer):
     sub_tasks = serializers.SerializerMethodField()
+    name = serializers.CharField(min_length=4)
 
     class Meta:
         model = Task

@@ -56,7 +56,7 @@ class Task(models.Model):
         return self.sub_tasks
 
 
-class TaskPart(models.Model):
+class SubTask(models.Model):
     parent = models.ForeignKey(
         'Task',
         on_delete=models.CASCADE,
