@@ -67,6 +67,17 @@ class SubTask(models.Model):
     description = models.TextField(max_length=10000)
 
 
+class SubTaskAssignment(models.Model):
+    user = models.ForeignKey(
+        'UserManagement.User',
+        on_delete=models.CASCADE
+    )
+    sub_task = models.ForeignKey(
+        'SubTask',
+        on_delete=models.CASCADE
+    )
+
+
 # class GroupTaskPermission(models.Model):
 #     group = models.ForeignKey(
 #         'UserManagement.Group',

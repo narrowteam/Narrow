@@ -68,6 +68,11 @@ class TaskViewSet(ViewSet):
         else:
             return Response(serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
+    # @action(detail=True, methods=['post'])
+    # def assign_to_sub_task(self):
+
+
+
     def get_permissions(self):
 
         """

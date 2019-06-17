@@ -1,10 +1,9 @@
 from rest_framework import serializers
-
 from UserManagement.serializers import UserSerializer
 from UserManagement.models import User
-from django.db.models import Q, Subquery
 
-from tasks.models import Task, TaskPermission, SubTask
+
+from tasks.models import Task, TaskPermission, SubTask, SubTaskAssignment
 
 
 class SubTaskSerializer(serializers.Serializer):
@@ -81,6 +80,25 @@ class TaskPermissionSerializer(serializers.ModelSerializer):
             'target',
             'permission_type',
         )
+
+class SubTaskAssignmentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = SubTaskAssignment
+        fields = (
+            'user',
+            'task'
+        )
+        extra_kwargs = {
+            'user': {
+                'many': True,
+                'write_only': True
+            },
+            'task': {
+                'write_only': True
+            }
+        }
+
 
 
 
