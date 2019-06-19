@@ -10,7 +10,7 @@ from projects.serializers import ProjectSerializer, ProjectDetailSerializer,  Pr
                                     UsersToInviteListSerializer, InvitationListSerializer, \
                                     UsersToRemoveListSerializer
 
-from .permissions import IsOwnerOrParticipant, IsOwner, IsOwnerOrInviting
+from .permissions import IsOwnerOrParticipant, IsOwner, IsInviting
 from projects.models import Project, Group, ProjectInvitation
 from django.db.models import Q, Subquery, Count
 
@@ -69,7 +69,7 @@ class ProjectViewSet(ViewSet):
         else:
             return Response(serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
-    # Gets all invitations related to project
+    # Gets all invitations related to project TODO return made invitations list
     @action(detail=True, methods=['get'], url_path='get_invitations', url_name='get_invitations', permission_classes = [IsOwner])
     def get_invitations(self, request, pk=None):
         project = get_object_or_404(Project, pk=pk)
@@ -127,11 +127,18 @@ class InvitationViewSet(GenericViewSet):
         return Response(status=status.HTTP_200_OK)
 
     # Accepts invitation and adds user to project
-    @action(detail=True, methods=['get'], permission_classes = [IsOwner])
+    @action(detail=True, methods=['get'], permission_classes=[IsOwner])
     def accept(self, request, pk=None):
         invitation = get_object_or_404(self.queryset, pk=pk)
         self.check_object_permissions(request, invitation)
         invitation.accept()
+        return Response(status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['get'], permission_classes=[IsOwner])
+    def reject(self, request, pk=None):
+        invitation = get_object_or_404(self.queryset, pk=pk)
+        self.check_object_permissions(request, invitation)
+        invitation.delete_with_duplicates()
         return Response(status=status.HTTP_200_OK)
 
     def get_permissions(self):
@@ -141,7 +148,7 @@ class InvitationViewSet(GenericViewSet):
         if self.action == 'accept':
             permission_classes = [IsOwner]
         elif self.action == 'destroy':
-            permission_classes = [IsOwnerOrInviting]
+            permission_classes = [IsInviting]
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]

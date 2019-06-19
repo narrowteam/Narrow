@@ -3,7 +3,7 @@ from UserManagement.serializers import UserSerializer
 from UserManagement.models import User
 
 
-from tasks.models import Task, TaskPermission, SubTask, SubTaskAssignment
+from tasks.models import Task, Task, SubTask, SubTaskAssignment
 
 
 class SubTaskSerializer(serializers.Serializer):
@@ -59,11 +59,6 @@ class TaskSerializer(serializers.ModelSerializer):
             print("Provide request in context")
             raise
         task = Task.objects.create(**validated_data)
-        TaskPermission.objects.create(
-            owner=task_creator,
-            target=task,
-            permission_type="EDIT",
-        )
         return task
 
     def get_sub_tasks(self, obj):
@@ -71,34 +66,29 @@ class TaskSerializer(serializers.ModelSerializer):
         return TaskSerializer(sub_tasks, many=True).data
 
 
-class TaskPermissionSerializer(serializers.ModelSerializer):
+class SubTaskAssignmentSerializer(serializers.Serializer):
+    users = serializers.ListField(
+        child=serializers.IntegerField(),
+        write_only=True
+    )
+    task = serializers.IntegerField(write_only=True)
 
-    class Meta:
-        model =TaskPermission
-        fields = (
-            'owner',
-            'target',
-            'permission_type',
+    def create(self, validated_data):
+        assignments = self._make_assignments_list(
+            users=validated_data['users'],
+            task=validated_data['task']
         )
+        SubTaskAssignment.objects.bulk_create(assignments)
+        return assignments
 
-class SubTaskAssignmentSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = SubTaskAssignment
-        fields = (
-            'user',
-            'task'
-        )
-        extra_kwargs = {
-            'user': {
-                'many': True,
-                'write_only': True
-            },
-            'task': {
-                'write_only': True
-            }
-        }
-
+    def _make_assignments_list(self, users, task):
+        return [
+            SubTaskAssignment(
+                    user=u,
+                    task=task
+                )
+            for u in users
+        ]
 
 
 

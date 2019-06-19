@@ -49,5 +49,5 @@ from rest_framework.routers import SimpleRouter, Route, DynamicRoute, DefaultRou
 
 router = DefaultRouter()
 router.register(r'tasks', views.TaskViewSet)
-# router.register(r'permission', views.TaskPermissionViewSet)
+router.register(r'assignments', views.SubTaskAssignmentViewSet)
 urlpatterns = router.urls

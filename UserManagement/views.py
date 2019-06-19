@@ -66,6 +66,19 @@ class UserViewSet(viewsets.ViewSet):
         serializer = UserPatchSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['get'], url_path='search')
+    def search(self, request):
+        try:
+            query = request.GET['query']
+        except:
+            return Response({'Error': 'Provide a query param'}, status=status.HTTP_400_BAD_REQUEST)
+        user = User.objects.matching_full_name(query)
+        serializer = BasicUserDataSerializer(user, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+
     def get_permissions(self):
         """
         Instantiates and returns the list of permissions that this view requires.

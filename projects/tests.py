@@ -337,9 +337,9 @@ class InvitationViewSetTest(APITestCase):
         self.assertTrue('id' in resp.data[0])
 
     def test_destroy_invited(self):
-        url = reverse('projects:invitations-detail', args=[self.invitation.id])
+        url = reverse('projects:invitations-detail', args=[self.invitation.id]) + 'reject/'
         self.client.force_authenticate(user=self.user_to_operations)
-        resp = self.client.delete(url)
+        resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertFalse(ProjectInvitation.objects.filter(pk=self.invitation.id).exists())
 

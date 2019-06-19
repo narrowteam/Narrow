@@ -94,3 +94,5 @@ class ProjectInvitation(models.Model):
         self.is_accepted = True
         self.save()
         return self
+
+
