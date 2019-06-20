@@ -4,6 +4,7 @@ from UserManagement.models import User
 
 
 from tasks.models import Task, Task, SubTask, SubTaskAssignment
+from cdn.models import TaskFile
 
 
 class SubTaskSerializer(serializers.Serializer):
@@ -100,6 +101,28 @@ class SubTaskAssignmentSerializer(serializers.Serializer):
                 )
             for u in users
         ]
+
+
+class SubTaskFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TaskFile()
+        fields = (
+            'file',
+            'sub_task',
+            'owner'
+        )
+        extra_kwargs = {
+            'sub_tasks': {
+                'required': False,
+                'read_only': True
+            },
+            'owner': {
+                'required': False,
+                'read_only': True
+            }
+        }
+
+
 
 
 

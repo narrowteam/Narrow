@@ -57,7 +57,7 @@ class UserViewSet(viewsets.ViewSet):
             return Response(serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
     def retrieve(self, request, pk=None):
-        user = get_object_or_404(self.queryset, id=pk)
+        user = get_object_or_404(self.queryset.exclude(id=request.user.id), id=pk)
         serializer = BasicUserDataSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

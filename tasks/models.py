@@ -66,6 +66,7 @@ class SubTask(models.Model):
     name = models.TextField(max_length=1000)
     description = models.TextField(max_length=10000)
     is_completed = models.BooleanField(default=False)
+    deadline = models.TimeField(null=True, blank=True)
 
     def complete(self):
         self.is_completed = True

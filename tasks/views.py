@@ -4,8 +4,8 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from projects.models import Project
-from tasks.serializers import TaskSerializer, SubTaskAssignmentSerializer
-from tasks.models import Task, SubTaskAssignment
+from tasks.serializers import TaskSerializer, SubTaskAssignmentSerializer, SubTaskFileSerializer
+from tasks.models import Task, SubTaskAssignment, SubTask
 from rest_framework.viewsets import ViewSet
 from rest_framework import mixins, viewsets
 from tasks.permissions import IsAssigned, IsProjectOwnerOrParticipant
@@ -112,6 +112,34 @@ class SubTaskAssignmentViewSet(mixins.CreateModelMixin,
     def get_queryset(self):
         return self.queryset
 
+
+class SubTasksView(viewsets.ViewSet):
+    queryset = SubTask.objects.all()
+
+    @action(methods=['get'], detail=True)
+    def complete(self, request, pk=None):
+        sub_task = get_object_or_404(self.queryset, id=pk)
+        self.check_object_permissions(request, sub_task)
+        sub_task.complete()
+        return Response(status=status.HTTP_200_OK)
+
+    @action(methods=['post'], detail=True)
+    def upload_file(self, request, pk=None):
+        serializer = SubTaskFileSerializer(data=request.data)
+        if serializer.is_valid():
+            sub_task = get_object_or_404(self.queryset, id=pk)
+            self.check_object_permissions(request, sub_task)
+            serializer.save(sub_task=sub_task, owner=request.user)
+            return Response(status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+    def get_queryset(self):
+        return self.queryset
+
+    def get_permissions(self):
+        permission_classes = [IsAssigned]
+        return [permission() for permission in permission_classes]
 
 
 # class TaskPermissionViewSet(mixins.CreateModelMixin,

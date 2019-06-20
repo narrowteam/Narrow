@@ -1,4 +1,5 @@
 1. Fix permission has_permission(
 2. Write tests for tasks
 3. Storing profile pictures history
-4. Fix user data patch and settings patch
+4. Fix user data patch and settings
+5. Verify if invitation exists
