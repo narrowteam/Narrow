@@ -72,7 +72,7 @@ class UserViewSet(viewsets.ViewSet):
             query = request.GET['query']
         except:
             return Response({'Error': 'Provide a query param'}, status=status.HTTP_400_BAD_REQUEST)
-        user = User.objects.matching_full_name(query)
+        user = User.objects.matching_full_name(request, query)
         serializer = BasicUserDataSerializer(user, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

@@ -22,11 +22,11 @@ class MyUserManager(BaseUserManager):
     def search(self, **kwargs):
         return
 
-    def matching_full_name(self, full_name):
+    def matching_full_name(self, request,  full_name):
         keywords = full_name.split(' ')
         if len(keywords) == 1:
             keywords.append('')
-        return self.filter(
+        return self.exclude(id=request.user.id).filter(
             Q(first_name__contains=keywords[0], last_name__contains=keywords[1])
             |
             Q(last_name__contains=keywords[0], first_name__contains=keywords[1])
