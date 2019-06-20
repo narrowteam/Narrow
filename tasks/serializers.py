@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from UserManagement.serializers import UserSerializer
+from UserManagement.serializers import BasicUserDataSerializer
 from UserManagement.models import User
 
 
@@ -7,12 +7,23 @@ from tasks.models import Task, Task, SubTask, SubTaskAssignment
 
 
 class SubTaskSerializer(serializers.Serializer):
+    assigned_users = serializers.SerializerMethodField()
 
     class Meta:
         model = SubTask
         fields = (
             'name',
             'description',
+            'assigned_users'
+        )
+
+    def get_assigned_users(self, obj):
+        return BasicUserDataSerializer(
+            User.objects.filter(
+                subTaskAssignments__in=SubTaskAssignment.objects.filter(
+                    sub_task=obj,
+                )
+            )
         )
 
 
@@ -63,7 +74,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def get_sub_tasks(self, obj):
         sub_tasks = obj.get_sub_tasks()
-        return TaskSerializer(sub_tasks, many=True).data
+        return SubTaskSerializer(sub_tasks, many=True).data
 
 
 class SubTaskAssignmentSerializer(serializers.Serializer):

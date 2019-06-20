@@ -6,11 +6,10 @@ from rest_framework.decorators import action
 from projects.models import Project
 from tasks.serializers import TaskSerializer, SubTaskAssignmentSerializer
 from tasks.models import Task, SubTaskAssignment
-from projects.permissions import IsOwnerOrParticipant, IsOwner
-
 from rest_framework.viewsets import ViewSet
 from rest_framework import mixins, viewsets
-
+from tasks.permissions import IsAssigned, IsProjectOwnerOrParticipant
+from projects.permissions import IsOwner
 
 class TaskViewSet(ViewSet):
 
@@ -73,10 +72,10 @@ class TaskViewSet(ViewSet):
         Instantiates and returns the list of permissions that this view requires.
         """
         if self.action == 'retrieve':
-            permission_classes = [IsOwnerOrParticipant]
+            permission_classes = [IsProjectOwnerOrParticipant]
 
         elif self.action == 'list':
-            permission_classes = [IsOwnerOrParticipant]
+            permission_classes = [IsProjectOwnerOrParticipant]
         else:
             permission_classes = [IsOwner]
         permission_classes.append(IsAuthenticated)

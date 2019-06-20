@@ -65,7 +65,12 @@ class SubTask(models.Model):
     )
     name = models.TextField(max_length=1000)
     description = models.TextField(max_length=10000)
+    is_completed = models.BooleanField(default=False)
 
+    def complete(self):
+        self.is_completed = True
+        self.save()
+        return self
 
 # class SubTaskAssignment(models.Manager):
 #     use_in_migrations = True
@@ -82,7 +87,7 @@ class SubTaskAssignment(models.Model):
     )
     sub_task = models.ForeignKey(
         'SubTask',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
     )
 
 
