@@ -28,5 +28,5 @@ class IsProjectOwnerOrParticipant(permissions.BasePermission):
         # return request.method in self.allowed_methods
 
     def has_object_permission(self, request, view, obj):
-        return request.user == obj.project.owner or request.user in obj.project.participants.all()
+        return request.user == obj.owner or request.user in obj.participants.all()
 

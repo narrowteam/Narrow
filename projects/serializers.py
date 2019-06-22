@@ -152,7 +152,7 @@ class UsersToRemoveListSerializer(serializers.Serializer):
 # Serializer only for read
 class InvitationListSerializer(serializers.ModelSerializer):
     project = ProjectSerializer(required=False)
-    owner = BasicUserDataSerializer(required=False)
+    invited = BasicUserDataSerializer(required=False, source='owner')
 
     class Meta:
         model = ProjectInvitation()
