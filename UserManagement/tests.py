@@ -59,6 +59,12 @@ class UserViewSet(APITestCase):
             "last_name": 'Smith'
         }
         self.test_user = User.objects.create(**self.test_data)
+        self.operation_user = User.objects.create(**{
+            'email': 'operation_user@gmail.com',
+            'password': 'Ac54!ftggre',
+            'first_name': 'Tom',
+            "last_name": 'Jerry'
+        })
 
     def test_create_positive_create_test(self):
         url = '/user/'
@@ -138,4 +144,11 @@ class UserViewSet(APITestCase):
         reponse = self.client.post(url, data)
 
         self.assertEqual(reponse.status_code, status.HTTP_406_NOT_ACCEPTABLE)
+
+    def test_search_user_full_name(self):
+        url = f'/user/search/?query={self.operation_user.first_name} {self.operation_user.last_name}'
+        self.client.force_authenticate(user=self.test_user)
+        reponse = self.client.get(url)
+        self.assertEqual(reponse.status_code, status.HTTP_200_OK)
+
 

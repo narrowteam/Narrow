@@ -8,7 +8,7 @@ from UserManagement.models import User
 from rest_framework.decorators import action
 from projects.serializers import ProjectSerializer, ProjectDetailSerializer,  ProjectPatchSerializer, \
                                     UsersToInviteListSerializer, InvitationListSerializer, \
-                                    UsersToRemoveListSerializer
+                                    UsersToRemoveListSerializer, UserInvitationListSerializer
 
 from .permissions import IsOwnerOrParticipant, IsOwner, IsInviting
 from projects.models import Project, Group, ProjectInvitation
@@ -113,9 +113,8 @@ class InvitationViewSet(GenericViewSet):
 
     # Returns all invites for request user
     def list(self, request):
-        invitations = request.user.invited_to.all()
-        # invitations = ProjectInvitation.objects.filter(owner=request.user)
-        serializer = InvitationListSerializer(invitations, many=True)
+        invitations = request.user.invited_to.filter(is_accepted=False, is_rejected=False)
+        serializer = UserInvitationListSerializer(invitations, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     # Deletes invitation - can be done by inviting or invited (it is rejection or cancelling)
@@ -132,13 +131,14 @@ class InvitationViewSet(GenericViewSet):
         invitation = get_object_or_404(self.queryset, pk=pk)
         self.check_object_permissions(request, invitation)
         invitation.accept()
-        return Response(status=status.HTTP_200_OK)
+        serializer = ProjectDetailSerializer(invitation.project)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['get'], permission_classes=[IsOwner])
     def reject(self, request, pk=None):
         invitation = get_object_or_404(self.queryset, pk=pk)
         self.check_object_permissions(request, invitation)
-        invitation.delete_with_duplicates()
+        invitation.reject()
         return Response(status=status.HTTP_200_OK)
 
     def get_permissions(self):

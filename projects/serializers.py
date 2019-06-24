@@ -149,7 +149,8 @@ class UsersToRemoveListSerializer(serializers.Serializer):
         validated_data['project'].remove_participants(users_to_remove)
         return users_to_remove
 
-# Serializer only for read
+
+
 class InvitationListSerializer(serializers.ModelSerializer):
     project = ProjectSerializer(required=False)
     invited = BasicUserDataSerializer(required=False, source='owner')
@@ -158,10 +159,10 @@ class InvitationListSerializer(serializers.ModelSerializer):
         model = ProjectInvitation()
         fields = (
             'id',
-            'owner',
+            'invited',
             'project',
             'is_accepted',
-            'invited'
+            'is_rejected',
         )
         extra_kwargs = {
             'id': {
@@ -174,7 +175,27 @@ class InvitationListSerializer(serializers.ModelSerializer):
             'is_accepted': {
                 'read_only': True
             },
-            'owner': {
+            'invited': {
+                'read_only': True,
+                'required': False
+            },
+        }
+
+# Serializer only for read
+class UserInvitationListSerializer(serializers.ModelSerializer):
+    project = ProjectSerializer(required=False)
+
+    class Meta:
+        model = ProjectInvitation()
+        fields = (
+            'id',
+            'project',
+        )
+        extra_kwargs = {
+            'id': {
+                'read_only': True
+            },
+            'project': {
                 'read_only': True,
                 'required': False
             },

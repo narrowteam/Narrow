@@ -77,6 +77,7 @@ class ProjectInvitation(models.Model):
 
     )
     is_accepted = models.BooleanField(default=False)
+    is_rejected = models.BooleanField(default=False)
 
     '''
         It is weird but i decided to do this because i personaly think 
@@ -92,6 +93,11 @@ class ProjectInvitation(models.Model):
     def accept(self):
         self.project.add_participant(self.owner)
         self.is_accepted = True
+        self.save()
+        return self
+
+    def reject(self):
+        self.is_rejected = True
         self.save()
         return self
 
