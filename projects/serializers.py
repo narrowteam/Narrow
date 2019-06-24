@@ -161,6 +161,7 @@ class InvitationListSerializer(serializers.ModelSerializer):
             'owner',
             'project',
             'is_accepted',
+            'invited'
         )
         extra_kwargs = {
             'id': {

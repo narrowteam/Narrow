@@ -29,7 +29,7 @@ class TaskViewSet(ViewSet):
     def list(self, request, project_id=None):
         project = Project.objects.get(id=project_id)
         self.check_object_permissions(request, project)
-        serializer = TaskSerializer(project.assignedTasks(), many=True)
+        serializer = TaskSerializer(Task.objects.filter(project=project), many=True)
         return Response(serializer.data, status.HTTP_200_OK)
 
     def destroy(self, request, project_id=None, pk=None):
