@@ -8,9 +8,9 @@ from UserManagement.models import User
 from rest_framework.decorators import action
 from projects.serializers import ProjectSerializer, ProjectDetailSerializer,  ProjectPatchSerializer, \
                                     UsersToInviteListSerializer, InvitationListSerializer, \
-                                    UsersToRemoveListSerializer
+                                    UsersToRemoveListSerializer, UserInvitationListSerializer
 
-from .permissions import IsOwnerOrParticipant, IsOwner, IsOwnerOrInviting
+from .permissions import IsOwnerOrParticipant, IsOwner, IsInviting
 from projects.models import Project, Group, ProjectInvitation
 from django.db.models import Q, Subquery, Count
 
@@ -19,7 +19,7 @@ class ProjectViewSet(ViewSet):
     queryset = Project.objects.all()
 
     def create(self, request):
-        serializer = ProjectDetailSerializer(data=request.data)
+        serializer = ProjectDetailSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save(owner=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -36,7 +36,7 @@ class ProjectViewSet(ViewSet):
     def retrieve(self, request, pk=None):
         project = get_object_or_404(self.queryset, pk=pk)
         self.check_object_permissions(request, project)
-        serializer = ProjectDetailSerializer(project)
+        serializer = ProjectDetailSerializer(project, context={'request': request})
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -69,7 +69,7 @@ class ProjectViewSet(ViewSet):
         else:
             return Response(serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
-    # Gets all invitations related to project
+    # Gets all invitations related to project TODO return made invitations list
     @action(detail=True, methods=['get'], url_path='get_invitations', url_name='get_invitations', permission_classes = [IsOwner])
     def get_invitations(self, request, pk=None):
         project = get_object_or_404(Project, pk=pk)
@@ -97,27 +97,24 @@ class ProjectViewSet(ViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        # if self.action == 'retrieve':
-        #     permission_classes = [IsOwnerOrParticipant]
-        if self.action == 'create':
-            permission_classes = [IsAuthenticated]
-        elif self.action == 'retrieve':
-            permission_classes = [IsOwnerOrParticipant]
+        permission_classes = [IsAuthenticated]
+        if self.action == 'retrieve':
+            permission_classes.append(IsOwnerOrParticipant)
         else:
-            permission_classes = [IsOwner]
+            permission_classes.append(IsOwner)
         return [permission() for permission in permission_classes]
 
     def get_queryset(self):
         return self.queryset
+
 
 class InvitationViewSet(GenericViewSet):
     queryset = ProjectInvitation.objects.all()
 
     # Returns all invites for request user
     def list(self, request):
-        invitations = request.user.invited_to.all()
-        # invitations = ProjectInvitation.objects.filter(owner=request.user)
-        serializer = InvitationListSerializer(invitations, many=True)
+        invitations = request.user.invited_to.filter(is_accepted=False, is_rejected=False)
+        serializer = UserInvitationListSerializer(invitations, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     # Deletes invitation - can be done by inviting or invited (it is rejection or cancelling)
@@ -129,11 +126,19 @@ class InvitationViewSet(GenericViewSet):
         return Response(status=status.HTTP_200_OK)
 
     # Accepts invitation and adds user to project
-    @action(detail=True, methods=['get'], permission_classes = [IsOwner])
+    @action(detail=True, methods=['get'], permission_classes=[IsOwner])
     def accept(self, request, pk=None):
         invitation = get_object_or_404(self.queryset, pk=pk)
         self.check_object_permissions(request, invitation)
         invitation.accept()
+        serializer = ProjectDetailSerializer(invitation.project)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['get'], permission_classes=[IsOwner])
+    def reject(self, request, pk=None):
+        invitation = get_object_or_404(self.queryset, pk=pk)
+        self.check_object_permissions(request, invitation)
+        invitation.reject()
         return Response(status=status.HTTP_200_OK)
 
     def get_permissions(self):
@@ -143,7 +148,7 @@ class InvitationViewSet(GenericViewSet):
         if self.action == 'accept':
             permission_classes = [IsOwner]
         elif self.action == 'destroy':
-            permission_classes = [IsOwnerOrInviting]
+            permission_classes = [IsInviting]
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]

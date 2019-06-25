@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from .models import Project, ProjectInvitation
-from UserManagement.serializers import UserSerializer
+from UserManagement.serializers import UserSerializer, BasicUserDataSerializer
 from UserManagement.models import User
 from django.db.models import Q, Subquery
 from utils.parsers import EmailOrIdUserList
@@ -10,7 +10,7 @@ from tasks.serializers import TaskSerializer
 
 class ProjectSerializer(serializers.ModelSerializer):
     participants__count = serializers.IntegerField(required=False)
-    owner = UserSerializer(required=False)
+    owner = BasicUserDataSerializer(required=False)
 
     class Meta:
         model = Project
@@ -41,9 +41,9 @@ class ProjectSerializer(serializers.ModelSerializer):
         }
 
 class ProjectDetailSerializer(ProjectSerializer):
-    participants = UserSerializer(required=False, many=True)
-    owner = UserSerializer(required=False)
-    main_task = serializers.SerializerMethodField()
+    participants = BasicUserDataSerializer(required=False, many=True)
+    owner = BasicUserDataSerializer(required=False)
+    assignedTasks = TaskSerializer(read_only=True, many=True)
 
     class Meta:
         model = Project
@@ -53,7 +53,7 @@ class ProjectDetailSerializer(ProjectSerializer):
             'project_name',
             'description',
             'participants',
-            'main_task',
+            'assignedTasks',
         )
         extra_kwargs = {
             'id': {
@@ -75,10 +75,6 @@ class ProjectDetailSerializer(ProjectSerializer):
                 'read_only': True
             },
         }
-
-    def get_main_task(self, obj):
-        task = obj.assignedTasks.get(is_main=True)
-        return TaskSerializer(task).data
 
 
 class ProjectPatchSerializer(ProjectSerializer):
@@ -153,18 +149,20 @@ class UsersToRemoveListSerializer(serializers.Serializer):
         validated_data['project'].remove_participants(users_to_remove)
         return users_to_remove
 
-# Serializer only for read
+
+
 class InvitationListSerializer(serializers.ModelSerializer):
     project = ProjectSerializer(required=False)
-    owner = UserSerializer(required=False)
+    invited = BasicUserDataSerializer(required=False, source='owner')
 
     class Meta:
         model = ProjectInvitation()
         fields = (
             'id',
-            'owner',
+            'invited',
             'project',
             'is_accepted',
+            'is_rejected',
         )
         extra_kwargs = {
             'id': {
@@ -177,10 +175,31 @@ class InvitationListSerializer(serializers.ModelSerializer):
             'is_accepted': {
                 'read_only': True
             },
-            'owner': {
+            'invited': {
                 'read_only': True,
                 'required': False
             },
         }
+
+# Serializer only for read
+class UserInvitationListSerializer(serializers.ModelSerializer):
+    project = ProjectSerializer(required=False)
+
+    class Meta:
+        model = ProjectInvitation()
+        fields = (
+            'id',
+            'project',
+        )
+        extra_kwargs = {
+            'id': {
+                'read_only': True
+            },
+            'project': {
+                'read_only': True,
+                'required': False
+            },
+        }
+
 # class InvitationListSerializer(serializers.Serializer):
 #     invited_users= InvitationSerializer(many=True)

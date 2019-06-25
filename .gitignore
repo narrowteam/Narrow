@@ -14,6 +14,9 @@ __pycache__/
 *$py.class
 Narrow/secret_settings.py
 
+cdn_data/
+Narrow/cdn_data/
+
 # C extensions
 *.so
 # Distribution / packaging

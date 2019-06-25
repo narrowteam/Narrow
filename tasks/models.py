@@ -1,19 +1,32 @@
 from django.db import models
 
+# class TaskPermission(models.Model):
+#     PERMISSION_TYPE_CHOICES = (
+#         ("READ", "Read"),  # Read only the task and subtasks,
+#         ("EDIT", "Edit")  # Full task and subtasks permissions
+#     )
+#
+#     owner = models.ForeignKey(
+#         'UserManagement.User',
+#         on_delete=models.CASCADE
+#     )
+#
+#     target = models.ForeignKey(
+#         'Task',
+#         on_delete=models.CASCADE,
+#         related_name='taskPermission'
+#     )
+#     permission_type = models.CharField(
+#         max_length=4,
+#         choices=PERMISSION_TYPE_CHOICES,
+#         default="READ"
+#     )
 
 class TaskManager(models.Manager):
     use_in_migrations = True
 
-    def create_main_task(self, **validated_data):
+    def create(self, **validated_data):
         task = self.model(**validated_data)
-        task.is_main = True
-        task.save(using=self._db)
-        return task
-
-    def create(self, parent, **validated_data):
-        task = self.model(**validated_data)
-        task.parent_task = parent
-        task.project = Task.objects.get(pk=parent.pk).project
         task.save(using=self._db)
         return task
 
@@ -26,43 +39,56 @@ class Task(models.Model):
         related_name='assignedTasks',
         on_delete=models.CASCADE
     )
-    is_main = models.BooleanField(default=False)
     name = models.TextField(max_length=120, blank=False)
     description = models.TextField(max_length=120, blank=True)
-    parent_task = models.ForeignKey(
-        'Task',
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True
-    )
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def push_sub_task(self, **validated_data):
+        validated_data['project'] = self.project
         new_task = Task.objects.create(self, **validated_data)
         return new_task
 
+    def chceck_permission(self, user):
+        return TaskPermission.objects.filter(target=self, owner=user).exists()
 
-class TaskPermission(models.Model):
-    PERMISSION_TYPE_CHOICES = (
-        ("READ", "Read"),  # Read only the task and subtasks,
-        ("EDIT", "Edit")  # Full task and subtasks permissions
+    def get_sub_tasks(self):
+        return self.sub_tasks
+
+
+class SubTask(models.Model):
+    parent = models.ForeignKey(
+        'Task',
+        on_delete=models.CASCADE,
+        related_name='sub_tasks'
+
     )
+    name = models.TextField(max_length=1000)
+    description = models.TextField(max_length=10000)
+    is_completed = models.BooleanField(default=False)
+    deadline = models.TimeField(null=True, blank=True)
 
-    owner = models.ForeignKey(
+    def complete(self):
+        self.is_completed = True
+        self.save()
+        return self
+
+# class SubTaskAssignment(models.Manager):
+#     use_in_migrations = True
+#
+#     def create(self, **validated_data):
+#         assignment = self.model(**validated_data)
+#         assignment.save(using=self._db)
+#         # return task
+
+class SubTaskAssignment(models.Model):
+    user = models.ForeignKey(
         'UserManagement.User',
         on_delete=models.CASCADE
     )
-
-    target = models.ForeignKey(
-        'Task',
-        on_delete=models.CASCADE
-    )
-    permission_type = models.CharField(
-        max_length=4,
-        choices=PERMISSION_TYPE_CHOICES,
-        default="READ"
+    sub_task = models.ForeignKey(
+        'SubTask',
+        on_delete=models.CASCADE,
     )
 
 

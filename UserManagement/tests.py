@@ -59,6 +59,12 @@ class UserViewSet(APITestCase):
             "last_name": 'Smith'
         }
         self.test_user = User.objects.create(**self.test_data)
+        self.operation_user = User.objects.create(**{
+            'email': 'operation_user@gmail.com',
+            'password': 'Ac54!ftggre',
+            'first_name': 'Tom',
+            "last_name": 'Jerry'
+        })
 
     def test_create_positive_create_test(self):
         url = '/user/'
@@ -103,28 +109,46 @@ class UserViewSet(APITestCase):
                                          "last_name": ["This field is required."],
                                          "password": ["This field is required."]
                                          })
-
-    def test_patch_positive(self):
-        url1 = '/user/'
-        data = {
-            'email': '3_test@gm.pl',
-            'first_name': 'Adamm',
-            "last_name": 'Smith'
-        }
-        self.client.force_authenticate(user=self.test_user)
-        response = self.client.patch(url1, data)
-        user = User.objects.get(email='3_test@gm.pl')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(user.email, data['email'])
-        self.assertEqual(user.first_name, data['first_name'])
-        self.assertEqual(user.last_name, data['last_name'])
+    #
+    # def test_patch_positive(self):
+    #     url1 = '/user/'
+    #     data = {
+    #         'settings': {
+    #             'email_notifications_on_events': True
+    #         }
+    #     }
+    #     self.client.force_authenticate(user=self.test_user)
+    #     response = self.client.patch(url1, data)
+    #     user = User.objects.get(email='3_test@gm.pl')
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #     self.assertEqual(user.settings.email_notifications_on_events, True)
 
     def test_set_password_positive(self):
-        url = '/user/set_password'
+        url = '/user/set_password/'
         data = {
-            'old_password': self.test_data['password'],
-            'new_password': "xD123@1"
+            'current_password': self.test_data['password'],
+            'new_password': "xD123@1!a"
         }
         self.client.force_authenticate(user=self.test_user)
         reponse = self.client.post(url, data)
         self.assertEqual(reponse.status_code, status.HTTP_200_OK)
+        self.assertTrue(self.test_user.check_password("xD123@1!a"))
+
+    def test_set_password__fail_invalid_current_password(self):
+        url = '/user/set_password/'
+        data = {
+            'current_password': self.test_data['password'] + 'a',
+            'new_password': "xD123@1!a"
+        }
+        self.client.force_authenticate(user=self.test_user)
+        reponse = self.client.post(url, data)
+
+        self.assertEqual(reponse.status_code, status.HTTP_406_NOT_ACCEPTABLE)
+
+    def test_search_user_full_name(self):
+        url = f'/user/search/?query={self.operation_user.first_name} {self.operation_user.last_name}'
+        self.client.force_authenticate(user=self.test_user)
+        reponse = self.client.get(url)
+        self.assertEqual(reponse.status_code, status.HTTP_200_OK)
+
+

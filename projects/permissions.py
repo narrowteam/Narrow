@@ -24,10 +24,10 @@ class IsOwner(permissions.BasePermission):
         return request.user == obj.owner
 
 
-class IsOwnerOrInviting(permissions.BasePermission):
+class IsInviting(permissions.BasePermission):
     def has_permission(self, request, view):
         return True
         # return request.method in self.allowed_methods
 
     def has_object_permission(self, request, view, obj):
-        return request.user == obj.owner or request.user == obj.project.owner
+        return request.user == obj.project.owner

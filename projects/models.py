@@ -11,18 +11,7 @@ class ProjectManager(models.Manager):
         project.save(using=self._db)
         # Auto adds owner as participant of project
         project.participants.add(project.owner)
-        self.add_main_task_for_project(project, **validated_data)
-
         return project
-
-    def add_main_task_for_project(self, project, **validated_data):
-        task_data = {
-            'name': validated_data['project_name'],
-            'project': project
-        }
-        if 'description' in validated_data:
-            task_data['description'] = validated_data['description']
-        Task.objects.create_main_task(**task_data)
 
 
 
@@ -88,6 +77,7 @@ class ProjectInvitation(models.Model):
 
     )
     is_accepted = models.BooleanField(default=False)
+    is_rejected = models.BooleanField(default=False)
 
     '''
         It is weird but i decided to do this because i personaly think 
@@ -105,3 +95,10 @@ class ProjectInvitation(models.Model):
         self.is_accepted = True
         self.save()
         return self
+
+    def reject(self):
+        self.is_rejected = True
+        self.save()
+        return self
+
+

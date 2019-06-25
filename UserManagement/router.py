@@ -40,4 +40,4 @@ router = CustomRouter()
 v = views.UserViewSet
 router.register(r'', v)
 urlpatterns = router.urls
-print("Patterns", urlpatterns)
+

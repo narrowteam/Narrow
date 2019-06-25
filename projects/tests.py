@@ -250,7 +250,7 @@ class ProjectViewSetTest(APITestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertTrue('id' in resp.data[0])
-        self.assertTrue('owner' in resp.data[0])
+        self.assertTrue('invited' in resp.data[0])
         self.assertTrue('is_accepted' in resp.data[0])
 
     def test_remove_participants(self):
@@ -324,25 +324,23 @@ class InvitationViewSetTest(APITestCase):
         self.invitation2 = ProjectInvitation.objects.create(
             owner=self.user_to_operations,
             project=self.project2
-        )
+        ),
 
     def test_list(self):
         url= reverse('projects:invitations-list')
         self.client.force_authenticate(user=self.user_to_operations)
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertTrue('owner' in resp.data[0])
+        self.assertTrue('invited' not in resp.data[0])
         self.assertTrue('project' in resp.data[0])
-        self.assertTrue('is_accepted' in resp.data[0])
         self.assertTrue('id' in resp.data[0])
 
-    def test_destroy_invited(self):
-        url = reverse('projects:invitations-detail', args=[self.invitation.id])
+    def test_reject_invited(self):
+        url = reverse('projects:invitations-detail', args=[self.invitation.id]) + 'reject/'
         self.client.force_authenticate(user=self.user_to_operations)
-        resp = self.client.delete(url)
+        resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertFalse(ProjectInvitation.objects.filter(pk=self.invitation.id).exists())
-
+        self.assertTrue(ProjectInvitation.objects.filter(pk=self.invitation.id, is_rejected=True).exists())
 
     def test_destroy_inviting(self):
         url = reverse('projects:invitations-detail', args=[self.invitation.id])
@@ -369,7 +367,7 @@ class InvitationViewSetTest(APITestCase):
         url = reverse('projects:invitations-detail', args=[self.invitation.id]) + 'accept/'
         self.client.force_authenticate(user=self.user_to_operations)
         resp = self.client.get(url)
-        updated_inv = ProjectInvitation.objects.get(pk = self.invitation.id)
+        updated_inv = ProjectInvitation.objects.get(pk=self.invitation.id)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertTrue(self.user_to_operations in self.project.participants.all())
         self.assertEqual(updated_inv.is_accepted, True)

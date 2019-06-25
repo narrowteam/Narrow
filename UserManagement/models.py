@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-
+from django.db.models import Q
 
 class UserSettings(models.Model):
     owner = models.OneToOneField(
@@ -11,10 +11,26 @@ class UserSettings(models.Model):
     email_notifications_on_events = models.BooleanField(
         default=True,
     )
+    is_email_public = models.BooleanField(
+        default=False,
+    )
 
 
 class MyUserManager(BaseUserManager):
     use_in_migrations = True
+
+    def search(self, **kwargs):
+        return
+
+    def matching_full_name(self, request,  full_name):
+        keywords = full_name.split(' ')
+        if len(keywords) == 1:
+            keywords.append('')
+        return self.exclude(id=request.user.id).filter(
+            Q(first_name__contains=keywords[0], last_name__contains=keywords[1])
+            |
+            Q(last_name__contains=keywords[0], first_name__contains=keywords[1])
+        )[:20]
 
     # for manage.py
     def create_superuser(self, email, password):
@@ -48,7 +64,6 @@ class User(AbstractBaseUser):
     last_name = models.CharField(
         max_length=127, unique=False, blank=False, null=False)
     registration_datetime = models.DateTimeField(auto_now=True)
-    profile_img = models.URLField(max_length=10000, blank=True, null=True)
     is_staff = models.BooleanField(default=False)
 
     objects = MyUserManager()
