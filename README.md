@@ -8,6 +8,8 @@ Frontend is an mobile app, written in ReactNative, see it [HERE](https://github.
 
 -----------
 
+### Installation
+
 If you want to run the app, you also have to set up Django. Clone most recent version, then run
 
 ```
