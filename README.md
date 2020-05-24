@@ -10,13 +10,11 @@ Frontend is an mobile app, written in ReactNative, see it [HERE](https://github.
 
 ### Installation
 
-If you want to run the app, you also have to set up Django. Clone most recent version, then run
+If you want to run the app, install docker and docker-compose, clone the repository, then
 
 ```
-pip install -r requirements.txt
-python manage.py makemigrations
-python manage.py migrate
-python manage.py runserver
+cd Narrow/
+docker-compose up -d
 ```
 
 Currently prepearing documentation to be published <br>
