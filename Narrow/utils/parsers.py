@@ -1,6 +1,7 @@
 from UserManagement.models import User
 from django.db.models import Q
 
+
 def list_of_dicts_to_dict_of_list(list_of_dicts, necessary_keys=None):
     data ={}
     for key in necessary_keys:
