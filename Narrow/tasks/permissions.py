@@ -18,6 +18,7 @@ class IsAssigned(permissions.BasePermission):
             sub_task=obj
         ).exist()
 
+
 class IsProjectOwnerOrParticipant(permissions.BasePermission):
 
     # def __init__(self, allowed_methods):

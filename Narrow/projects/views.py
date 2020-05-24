@@ -1,18 +1,16 @@
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet, GenericViewSet
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from UserManagement.models import User
 from rest_framework.decorators import action
 from projects.serializers import ProjectSerializer, ProjectDetailSerializer,  ProjectPatchSerializer, \
                                     UsersToInviteListSerializer, InvitationListSerializer, \
                                     UsersToRemoveListSerializer, UserInvitationListSerializer
 
 from .permissions import IsOwnerOrParticipant, IsOwner, IsInviting
-from projects.models import Project, Group, ProjectInvitation
-from django.db.models import Q, Subquery, Count
+from projects.models import Project, ProjectInvitation
+from django.db.models import Count
 
 
 class ProjectViewSet(ViewSet):
@@ -79,7 +77,7 @@ class ProjectViewSet(ViewSet):
         serializer = InvitationListSerializer(invitations, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['post'],url_path='remove_participants', url_name='remove_participants', permission_classes = [IsOwner])
+    @action(detail=True, methods=['post'], url_path='remove_participants', url_name='remove_participants', permission_classes = [IsOwner])
     def remove_participants(self, request, pk=None):
         serializer = UsersToRemoveListSerializer(data=request.data)
         project = get_object_or_404(Project, pk=pk)

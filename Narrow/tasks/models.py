@@ -1,26 +1,30 @@
 from django.db import models
 
-# class TaskPermission(models.Model):
-#     PERMISSION_TYPE_CHOICES = (
-#         ("READ", "Read"),  # Read only the task and subtasks,
-#         ("EDIT", "Edit")  # Full task and subtasks permissions
-#     )
-#
-#     owner = models.ForeignKey(
-#         'UserManagement.User',
-#         on_delete=models.CASCADE
-#     )
-#
-#     target = models.ForeignKey(
-#         'Task',
-#         on_delete=models.CASCADE,
-#         related_name='taskPermission'
-#     )
-#     permission_type = models.CharField(
-#         max_length=4,
-#         choices=PERMISSION_TYPE_CHOICES,
-#         default="READ"
-#     )
+
+
+class TaskPermission(models.Model):
+    PERMISSION_TYPE_CHOICES = (
+        ("READ", "Read"),  # Read only the task and subtasks,
+        ("EDIT", "Edit")  # Full task and subtasks permissions
+    )
+
+    owner = models.ForeignKey(
+        'UserManagement.User',
+        on_delete=models.CASCADE
+    )
+
+    target = models.ForeignKey(
+        'Task',
+        on_delete=models.CASCADE,
+        related_name='taskPermission'
+    )
+    permission_type = models.CharField(
+        max_length=4,
+        choices=PERMISSION_TYPE_CHOICES,
+        default="READ"
+    )
+
+
 
 class TaskManager(models.Manager):
     use_in_migrations = True

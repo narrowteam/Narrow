@@ -9,6 +9,7 @@ from projects.models import Project, ProjectInvitation
 from UserManagement.models import User
 from django.db.models import Q
 
+
 class ProjectTest(TestCase):
     def setUp(self):
         self.user_owner = User.objects.create(email='test_email@gmail.com',
@@ -28,7 +29,6 @@ class ProjectTest(TestCase):
 
         self.project = Project.objects.create(**self.dataset)
 
-
     def test_create_project(self):
         proj = Project.objects.create(**self.dataset)
         self.assertEqual(proj.project_name,'test')
@@ -43,6 +43,7 @@ class ProjectTest(TestCase):
         self.project.add(self.user_to_operations)
         self.project.remove_participants([self.user_to_operations])
         self.assertTrue(self.user_to_operations not in self.project)
+
 
 class InvitationTest(TestCase):
     def setUp(self):
@@ -310,16 +311,16 @@ class InvitationViewSetTest(APITestCase):
                                                            )
 
         self.project = Project.objects.create(
-            project_name= 'test',
-            owner= self.user_owner
+            project_name='test',
+            owner=self.user_owner
         )
         self.project2 = Project.objects.create(
             project_name='test',
             owner=self.user_owner
         )
         self.invitation = ProjectInvitation.objects.create(
-            owner = self.user_to_operations,
-            project = self.project
+            owner=self.user_to_operations,
+            project=self.project
         )
         self.invitation2 = ProjectInvitation.objects.create(
             owner=self.user_to_operations,
@@ -327,7 +328,7 @@ class InvitationViewSetTest(APITestCase):
         ),
 
     def test_list(self):
-        url= reverse('projects:invitations-list')
+        url = reverse('projects:invitations-list')
         self.client.force_authenticate(user=self.user_to_operations)
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
@@ -383,37 +384,5 @@ class InvitationViewSetTest(APITestCase):
         self.client.force_authenticate(user=self.user_not_authorized)
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

@@ -13,7 +13,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 Narrow/secret_settings.py
-.Narrow
 
 cdn_data/
 Narrow/cdn_data/

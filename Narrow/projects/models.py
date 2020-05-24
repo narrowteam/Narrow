@@ -14,14 +14,12 @@ class ProjectManager(models.Manager):
         return project
 
 
-
 class Project(models.Model):
     objects = ProjectManager()
 
     owner = models.ForeignKey(
         'UserManagement.User',
         on_delete=models.CASCADE,
-        # related_name='owned'
     )
     project_name = models.TextField(max_length=100, blank=False)
     description = models.TextField(max_length=1000, blank=True)
@@ -34,14 +32,12 @@ class Project(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-
     def add_participant(self, user):
         self.participants.add(user)
 
-
     def remove_participants(self, participants_list):
         for participant in participants_list:
-         self.participants.remove(participant)
+            self.participants.remove(participant)
 
     def update(self, **validated_data):
         for attr, value in validated_data.items():
@@ -49,43 +45,38 @@ class Project(models.Model):
         self.save()
         return self
 
-class Group(models.Model):
-    project = models.ForeignKey(
-        'Project',
-        on_delete=models.CASCADE,
-    )
-    name = models.TextField(max_length=100, blank=False)
-    participants = models.ManyToManyField(
-        "UserManagement.User",
-        blank=True,
-    )
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+# class Group(models.Model):
+#     project = models.ForeignKey(
+#         'Project',
+#         on_delete=models.CASCADE,
+#     )
+#     name = models.TextField(max_length=100, blank=False)
+#     participants = models.ManyToManyField(
+#         "UserManagement.User",
+#         blank=True,
+#     )
+#
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
 
 
 class ProjectInvitation(models.Model):
     owner = models.ForeignKey(
         'UserManagement.User',
         on_delete=models.CASCADE,
-        related_name = 'invited_to',
+        related_name='invited_to',
     )
     project = models.ForeignKey(
         'Project',
         on_delete=models.CASCADE,
         related_name='invited_users'
-
     )
     is_accepted = models.BooleanField(default=False)
     is_rejected = models.BooleanField(default=False)
 
-    '''
-        It is weird but i decided to do this because i personaly think 
-        letting invitations to duplicate will be better for app performance 
-        than making massive validation for whole invited list
-    '''
     def delete_with_duplicates(self):
-        invitations =ProjectInvitation.objects.filter(
+        invitations = ProjectInvitation.objects.filter(
             Q(owner=self.owner) & Q(project=self.project)
         )
         invitations.delete()
